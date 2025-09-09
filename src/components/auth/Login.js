@@ -228,9 +228,7 @@ const Login = () => {
           transition={{ delay: 0.5 }}
           className="text-center mt-8"
         >
-          <p className="text-sm text-gray-400">
-            Demo credentials: admin@demo.com / password123
-          </p>
+        
         </motion.div>
       </motion.div>
     </div>

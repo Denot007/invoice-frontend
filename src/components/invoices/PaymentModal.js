@@ -7,7 +7,7 @@ import {
   DocumentTextIcon,
   CreditCardIcon
 } from '@heroicons/react/24/outline';
-
+import { API_BASE_URL } from '../../services/urls';
 const PaymentModal = ({ isOpen, onClose, invoice, onPaymentRecorded }) => {
   const [formData, setFormData] = useState({
     amount: '',
@@ -52,9 +52,12 @@ const PaymentModal = ({ isOpen, onClose, invoice, onPaymentRecorded }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    
+
 
     try {
-      const response = await fetch(`http://localhost:8000/api/invoices/${invoice.id}/record_payment/`, {
+      
+      const response = await fetch(`${API_BASE_URL}/invoices/${invoice.id}/record_payment/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

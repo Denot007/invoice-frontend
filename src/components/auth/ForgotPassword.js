@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { EnvelopeIcon, ArrowLeftIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { API_BASE_URL } from '../../services/urls';
 
 const ForgotPassword = ({ onBackToLogin }) => {
   const [email, setEmail] = useState('');
@@ -12,8 +13,10 @@ const ForgotPassword = ({ onBackToLogin }) => {
     e.preventDefault();
     setIsLoading(true);
 
+    
+
     try {
-      const response = await fetch('http://localhost:8000/api/accounts/password-reset/request/', {
+      const response = await fetch(`${API_BASE_URL}/accounts/password-reset/request/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

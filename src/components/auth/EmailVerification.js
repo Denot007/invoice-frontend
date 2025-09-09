@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { Mail, ArrowLeft, RefreshCw } from 'lucide-react';
+import { API_BASE_URL } from '../../services/urls';
 
 const EmailVerification = ({ email, onBackToLogin, onVerificationSuccess }) => {
   const [verificationCode, setVerificationCode] = useState('');
@@ -22,7 +23,7 @@ const EmailVerification = ({ email, onBackToLogin, onVerificationSuccess }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/accounts/email-verification/verify/', {
+      const response = await fetch(`${API_BASE_URL}/accounts/email-verification/verify/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,7 +54,7 @@ const EmailVerification = ({ email, onBackToLogin, onVerificationSuccess }) => {
     setIsResending(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/accounts/email-verification/resend/', {
+      const response = await fetch(`${API_BASE_URL}/accounts/email-verification/resend/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

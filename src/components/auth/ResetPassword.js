@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import {  EyeIcon, EyeSlashIcon, CheckCircleIcon, ExclamationTriangleIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
+import { API_BASE_URL } from '../../services/urls';
 
 const ResetPassword = () => {
   const { uid, token } = useParams();
@@ -54,9 +55,10 @@ const ResetPassword = () => {
     }
 
     setIsLoading(true);
+      
 
     try {
-      const response = await fetch('http://localhost:8000/api/accounts/password-reset/confirm/', {
+      const response = await fetch(`${API_BASE_URL}/accounts/password-reset/confirm/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -14,6 +14,7 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../services/urls';
 
 const Profile = () => {
   const { user, updateUser: _updateUser, refreshUser } = useAuth();
@@ -109,7 +110,8 @@ const Profile = () => {
       }
 
       // Update profile via API
-      const response = await fetch('http://localhost:8000/api/accounts/company/', {
+     
+      const response = await fetch(`${API_BASE_URL}/accounts/company/`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
