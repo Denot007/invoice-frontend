@@ -16,7 +16,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 
 const Profile = () => {
-  const { user, updateUser, refreshUser } = useAuth();
+  const { user, updateUser: _updateUser, refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState(false);
   const [logoPreview, setLogoPreview] = useState(null);

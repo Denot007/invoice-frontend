@@ -5,7 +5,6 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
   CalendarIcon,
-  CurrencyDollarIcon,
   SparklesIcon,
   ArrowPathIcon,
   XMarkIcon
@@ -184,7 +183,7 @@ const Settings = () => {
 
   const handleSyncSubscription = async () => {
     try {
-      const response = await billingService.syncSubscription();
+      const _response = await billingService.syncSubscription();
       toast.success('Subscription synced successfully');
       // Reload billing data
       loadBillingData();

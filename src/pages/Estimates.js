@@ -56,7 +56,7 @@ const Estimates = () => {
     }
   };
 
-  const getStatusIcon = (status) => {
+  const _getStatusIcon = (status) => {
     switch (status) {
       case 'accepted':
         return <CheckCircleIcon className="h-5 w-5 text-green-500" />;

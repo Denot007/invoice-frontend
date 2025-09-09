@@ -8,10 +8,8 @@ import {
   DocumentTextIcon,
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
-  EyeIcon,
   ArrowDownTrayIcon,
-  CalendarIcon,
-  FunnelIcon
+  CalendarIcon
 } from '@heroicons/react/24/outline';
 import {
   LineChart,
@@ -524,7 +522,7 @@ const Reports = () => {
                     tickFormatter={(value) => value.length > 20 ? value.substring(0, 20) + '...' : value}
                   />
                   <Tooltip 
-                    formatter={(value, name) => [formatCurrency(value), 'Total Paid']}
+                    formatter={(value, _name) => [formatCurrency(value), 'Total Paid']}
                     labelFormatter={(label) => `Client: ${label}`}
                   />
                   <Bar 

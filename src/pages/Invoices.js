@@ -23,7 +23,7 @@ import invoiceService from '../services/invoiceService';
 import { useAuth } from '../context/AuthContext';
 
 const Invoices = () => {
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -159,7 +159,7 @@ const Invoices = () => {
     setIsPaymentModalOpen(true);
   };
 
-  const handlePaymentRecorded = async (paymentData) => {
+  const handlePaymentRecorded = async (_paymentData) => {
     // Refresh invoices to show updated status and amounts
     await fetchInvoices();
     toast.success('Payment recorded successfully!');
