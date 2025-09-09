@@ -1,5 +1,9 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
+const API_BASE_URL =  'https://invoyci.onrender.com/api';
+// const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
+
+
 
 const AuthContext = createContext();
 
@@ -28,7 +32,7 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/accounts/profile/');
+      const response = await axios.get(`${API_BASE_URL}/accounts/profile/`);
       setUser(response.data);
     } catch (error) {
       localStorage.removeItem('token');
@@ -40,7 +44,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('http://localhost:8000/api/accounts/login/', {
+      const response = await axios.post(`${API_BASE_URL}/accounts/login/`, {
         email,
         password,
       });
@@ -83,7 +87,7 @@ export const AuthProvider = ({ children }) => {
         password: userData.password,
         password_confirm: userData.confirmPassword,
       };
-      const response = await axios.post('http://localhost:8000/api/accounts/register/', payload);
+      const response = await axios.post(`${API_BASE_URL}/accounts/register/`, payload);
       
       // Handle email verification required response
       if (response.data.verification_required) {
@@ -115,7 +119,7 @@ export const AuthProvider = ({ children }) => {
 
   const refreshUser = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/accounts/profile/');
+      const response = await axios.get(`${API_BASE_URL}/accounts/profile/`);
       setUser(response.data);
       return response.data;
     } catch (error) {
