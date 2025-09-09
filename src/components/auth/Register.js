@@ -15,8 +15,7 @@ import {
   PhoneIcon,
   MapPinIcon,
   GlobeAltIcon,
-  ArrowLeftIcon,
-  DocumentDuplicateIcon
+ 
 } from '@heroicons/react/24/outline';
 
 const Register = () => {

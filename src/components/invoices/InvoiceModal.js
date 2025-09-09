@@ -1,19 +1,19 @@
 import React, { useState, useEffect, Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion} from 'framer-motion';
 import { toast } from 'react-toastify';
 import {
   XMarkIcon,
   PlusIcon,
   TrashIcon,
   CalculatorIcon,
-  CalendarIcon,
+ 
   UserGroupIcon,
   DocumentTextIcon,
   CurrencyDollarIcon,
   CreditCardIcon,
 } from '@heroicons/react/24/outline';
-import axios from 'axios';
+
 import clientService from '../../services/clientService';
 
 const InvoiceModal = ({ isOpen, onClose, invoice, onSave, preSelectedClient }) => {
@@ -30,7 +30,7 @@ const InvoiceModal = ({ isOpen, onClose, invoice, onSave, preSelectedClient }) =
     terms: 'Net 30',
     tax_rate: 0,
     status: 'draft',
-    // Payment fields for partial payments during creation
+    // Payment fields for partial payments during creation AnimatePresence
     initial_payment: '',
     payment_method: '',
     payment_reference: '',

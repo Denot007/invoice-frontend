@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
-import { Mail, ArrowLeft, CheckCircle, RefreshCw } from 'lucide-react';
+import { Mail, ArrowLeft, RefreshCw } from 'lucide-react';
 
 const EmailVerification = ({ email, onBackToLogin, onVerificationSuccess }) => {
   const [verificationCode, setVerificationCode] = useState('');

@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = "invoyci.netlify.app/api"
+const API_BASE_URL_local = 'http://localhost:8000/api'; 
 
 class ApiService {
   constructor() {

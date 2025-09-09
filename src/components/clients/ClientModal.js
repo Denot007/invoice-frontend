@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { motion } from 'framer-motion';
+
 import {
   XMarkIcon,
   UserGroupIcon,
@@ -10,7 +10,7 @@ import {
   PhoneIcon,
   MapPinIcon,
   GlobeAltIcon,
-  DocumentTextIcon,
+ 
 } from '@heroicons/react/24/outline';
 
 const ClientModal = ({ isOpen, onClose, client, onSave }) => {

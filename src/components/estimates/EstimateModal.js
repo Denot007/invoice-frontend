@@ -6,7 +6,7 @@ import {
   PlusIcon,
   TrashIcon,
   CalculatorIcon,
-  CalendarIcon,
+  
   UserGroupIcon,
   DocumentDuplicateIcon,
 } from '@heroicons/react/24/outline';

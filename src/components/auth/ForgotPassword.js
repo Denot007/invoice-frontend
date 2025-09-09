@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
-import { EnvelopeIcon, ArrowLeftIcon, CheckCircleIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
+import { EnvelopeIcon, ArrowLeftIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 
 const ForgotPassword = ({ onBackToLogin }) => {
   const [email, setEmail] = useState('');

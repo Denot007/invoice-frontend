@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import {
   XMarkIcon,
   PrinterIcon,
-  ArrowDownTrayIcon,
+ 
   PaperAirplaneIcon,
   PencilIcon,
   DocumentDuplicateIcon,

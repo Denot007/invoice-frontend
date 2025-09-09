@@ -1,21 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 import {
   PlusIcon,
   MagnifyingGlassIcon,
-  FunnelIcon,
   ArrowDownTrayIcon,
-  EyeIcon,
-  PencilIcon,
-  TrashIcon,
-  DocumentDuplicateIcon,
   PaperAirplaneIcon,
   CheckCircleIcon,
   ClockIcon,
   ExclamationCircleIcon,
   DocumentTextIcon,
-  CurrencyDollarIcon,
   XCircleIcon,
   Cog6ToothIcon,
 } from '@heroicons/react/24/outline';

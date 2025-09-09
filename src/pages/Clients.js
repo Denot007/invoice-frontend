@@ -16,7 +16,7 @@ import {
   ArrowDownTrayIcon,
   ArchiveBoxIcon,
   ArchiveBoxArrowDownIcon,
-  UserIcon,
+
   EyeIcon,
 } from '@heroicons/react/24/outline';
 import ClientModal from '../components/clients/ClientModal';
@@ -27,10 +27,10 @@ import InvoiceModal from '../components/invoices/InvoiceModal';
 import InvoiceViewModal from '../components/invoices/InvoiceViewModal';
 import clientService from '../services/clientService';
 import invoiceService from '../services/invoiceService';
-import { useAuth } from '../context/AuthContext';
+// import { useAuth } from '../context/AuthContext';
 
 const Clients = () => {
-  const { user } = useAuth();
+  // const { user } = useAuth();
   const [allClients, setAllClients] = useState([]);
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);

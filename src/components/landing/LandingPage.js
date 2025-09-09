@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -20,7 +20,7 @@ import {
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [ setIsVideoPlaying] = useState(false);
 
   const fadeInUp = {
     initial: { opacity: 0, y: 60 },

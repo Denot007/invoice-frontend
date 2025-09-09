@@ -8,7 +8,7 @@ import {
   PencilIcon,
   DocumentDuplicateIcon,
   PaperAirplaneIcon,
-  CalendarIcon,
+ 
   CurrencyDollarIcon,
   DocumentTextIcon,
   ClockIcon,

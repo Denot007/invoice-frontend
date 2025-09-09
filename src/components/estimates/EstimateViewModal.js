@@ -3,14 +3,14 @@ import { Dialog, Transition } from '@headlessui/react';
 import { motion } from 'framer-motion';
 import {
   XMarkIcon,
-  PrinterIcon,
+ 
   ArrowDownTrayIcon,
   PaperAirplaneIcon,
   PencilIcon,
   DocumentDuplicateIcon,
   CalendarIcon,
   UserIcon,
-  CurrencyDollarIcon,
+ 
 } from '@heroicons/react/24/outline';
 
 const EstimateViewModal = ({ isOpen, onClose, estimate, onEdit, onDuplicate, onSend, onExport }) => {
