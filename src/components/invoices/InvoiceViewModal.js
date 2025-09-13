@@ -291,6 +291,9 @@ const InvoiceViewModal = ({ isOpen, onClose, invoice, onEdit, onDuplicate, onSen
                         <thead className="bg-gray-50 dark:bg-gray-900/50">
                           <tr>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                              Item
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                               Description
                             </th>
                             <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -307,6 +310,9 @@ const InvoiceViewModal = ({ isOpen, onClose, invoice, onEdit, onDuplicate, onSen
                         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                           {(invoice.items || []).map((item, index) => (
                             <tr key={index} className="bg-white dark:bg-gray-800">
+                              <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                                {item.item || 'No item'}
+                              </td>
                               <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
                                 {item.description || 'No description'}
                               </td>

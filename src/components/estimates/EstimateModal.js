@@ -11,6 +11,8 @@ import {
   DocumentDuplicateIcon,
 } from '@heroicons/react/24/outline';
 import clientService from '../../services/clientService';
+import ItemSelector from '../items/ItemSelector';
+import { toast } from 'react-toastify';
 
 const EstimateModal = ({ isOpen, onClose, estimate, onSave }) => {
   const [formData, setFormData] = useState({
@@ -21,7 +23,7 @@ const EstimateModal = ({ isOpen, onClose, estimate, onSave }) => {
     description: '',
     issue_date: new Date().toISOString().split('T')[0],
     expiry_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    items: [{ description: '', quantity: 1, unit_price: 0, total: 0 }],
+    items: [{ item: '', description: '', quantity: 1, unit_price: 0, total: 0 }],
     notes: '',
     terms: 'Valid for 30 days',
     tax_rate: 0,
@@ -43,11 +45,12 @@ const EstimateModal = ({ isOpen, onClose, estimate, onSave }) => {
         issue_date: estimate.issue_date || new Date().toISOString().split('T')[0],
         expiry_date: estimate.expiry_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         items: (estimate.items || []).length > 0 ? estimate.items.map(item => ({
+          item: item.item || '',
           description: item.description || '',
           quantity: item.quantity || 1,
           unit_price: item.unit_price || 0,
           total: (item.quantity || 1) * (item.unit_price || 0),
-        })) : [{ description: '', quantity: 1, unit_price: 0, total: 0 }],
+        })) : [{ item: '', description: '', quantity: 1, unit_price: 0, total: 0 }],
         notes: estimate.notes || '',
         terms: estimate.terms || 'Valid for 30 days',
         tax_rate: estimate.tax_rate || 0,
@@ -135,7 +138,7 @@ const EstimateModal = ({ isOpen, onClose, estimate, onSave }) => {
   const addItem = () => {
     setFormData(prev => ({
       ...prev,
-      items: [...prev.items, { description: '', quantity: 1, unit_price: 0, total: 0 }],
+      items: [...prev.items, { item: '', description: '', quantity: 1, unit_price: 0, total: 0 }],
     }));
   };
 
@@ -167,22 +170,37 @@ const EstimateModal = ({ isOpen, onClose, estimate, onSave }) => {
     return subtotal + tax - discount;
   };
 
+  const handleItemFromLibrary = (selectedItem) => {
+    const newItem = {
+      item: selectedItem.name,
+      description: selectedItem.description || '',
+      quantity: 1,
+      unit_price: parseFloat(selectedItem.unit_price) || 0,
+      total: parseFloat(selectedItem.unit_price) || 0,
+    };
+    
+    setFormData(prev => ({
+      ...prev,
+      items: [...prev.items, newItem],
+    }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     
     // Validate required fields
     if (!formData.clientId) {
-      alert('Please select a client');
+      toast.info('Please select a client');
       return;
     }
     
     if (!formData.title) {
-      alert('Please enter an estimate title');
+      toast.info('Please enter an estimate title');
       return;
     }
     
     if (formData.items.length === 0 || formData.items.every(item => !item.description)) {
-      alert('Please add at least one item');
+      toast.info('Please add at least one item');
       return;
     }
     
@@ -205,6 +223,7 @@ const EstimateModal = ({ isOpen, onClose, estimate, onSave }) => {
       tax_rate: parseFloat(formData.tax_rate) || 0,
       status: formData.status,
       items: formData.items.map(item => ({
+        item: item.item || '',
         description: item.description,
         quantity: parseFloat(item.quantity) || 0,
         unit_price: parseFloat(item.unit_price) || 0,
@@ -394,7 +413,8 @@ const EstimateModal = ({ isOpen, onClose, estimate, onSave }) => {
                       </h3>
                       <div className="space-y-2">
                         <div className="grid grid-cols-12 gap-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                          <div className="col-span-5">Description</div>
+                          <div className="col-span-2">Item</div>
+                          <div className="col-span-3">Description</div>
                           <div className="col-span-2">Quantity</div>
                           <div className="col-span-2">Rate</div>
                           <div className="col-span-2">Amount</div>
@@ -409,9 +429,17 @@ const EstimateModal = ({ isOpen, onClose, estimate, onSave }) => {
                           >
                             <input
                               type="text"
+                              value={item.item}
+                              onChange={(e) => handleItemChange(index, 'item', e.target.value)}
+                              className="col-span-2 input text-sm"
+                              placeholder="Item name"
+                              required
+                            />
+                            <input
+                              type="text"
                               value={item.description}
                               onChange={(e) => handleItemChange(index, 'description', e.target.value)}
-                              className="col-span-5 input text-sm"
+                              className="col-span-3 input text-sm"
                               placeholder="Service description"
                               required
                             />
@@ -446,14 +474,21 @@ const EstimateModal = ({ isOpen, onClose, estimate, onSave }) => {
                           </motion.div>
                         ))}
                       </div>
-                      <button
-                        type="button"
-                        onClick={addItem}
-                        className="mt-3 btn-secondary flex items-center text-sm"
-                      >
-                        <PlusIcon className="h-4 w-4 mr-1" />
-                        Add Item
-                      </button>
+                      <div className="mt-3 flex space-x-3">
+                        <button
+                          type="button"
+                          onClick={addItem}
+                          className="btn-secondary flex items-center text-sm"
+                        >
+                          <PlusIcon className="h-4 w-4 mr-1" />
+                          Add Empty Item
+                        </button>
+                        
+                        <ItemSelector
+                          onItemSelect={handleItemFromLibrary}
+                          buttonClassName="inline-flex items-center px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
+                        />
+                      </div>
                     </div>
 
                     {/* Totals */}

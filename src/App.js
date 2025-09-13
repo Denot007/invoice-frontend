@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastContainer } from 'react-toastify';
+import { Toaster } from 'react-hot-toast';
 import 'react-toastify/dist/ReactToastify.css';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
@@ -15,9 +16,20 @@ import Dashboard from './components/dashboard/Dashboard';
 import Invoices from './pages/Invoices';
 import Clients from './pages/Clients';
 import Estimates from './pages/Estimates';
+import Items from './pages/Items';
+import TimeTracking from './pages/TimeTracking';
+import Expenses from './pages/Expenses';
 import Profile from './pages/Profile';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
+import Calendar from './pages/Calendar';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
+import ContactUs from './pages/ContactUs';
+import AboutUs from './pages/AboutUs';
+import CookiePolicy from './pages/CookiePolicy';
+import RefundPolicy from './pages/RefundPolicy';
+import FAQ from './pages/FAQ';
 
 const queryClient = new QueryClient();
 
@@ -75,6 +87,7 @@ function App() {
                 theme="colored"
                 className="mt-16"
               />
+              <Toaster position="top-right" />
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<LandingPage />} />
@@ -82,6 +95,16 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/signup" element={<Navigate to="/register" />} />
                 <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
+                
+                {/* Legal Pages */}
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/contact" element={<ContactUs />} />
+                <Route path="/about" element={<AboutUs />} />
+                <Route path="/cookies" element={<CookiePolicy />} />
+                <Route path="/refund" element={<RefundPolicy />} />
+                <Route path="/faq" element={<FAQ />} />
+                <Route path="/pricing" element={<Navigate to="/register" />} />
                 
                 {/* Protected Routes */}
                 <Route
@@ -125,6 +148,36 @@ function App() {
                   }
                 />
                 <Route
+                  path="/items"
+                  element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Items />
+                      </Layout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/time-tracking"
+                  element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <TimeTracking />
+                      </Layout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/expenses"
+                  element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Expenses />
+                      </Layout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="/reports"
                   element={
                     <ProtectedRoute>
@@ -151,6 +204,14 @@ function App() {
                       <Layout>
                         <Profile />
                       </Layout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/calendar"
+                  element={
+                    <ProtectedRoute>
+                      <Calendar />
                     </ProtectedRoute>
                   }
                 />

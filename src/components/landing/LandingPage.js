@@ -1,6 +1,7 @@
 import  { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import Footer from '../layout/Footer';
 import {
   ChartBarIcon,
   DocumentDuplicateIcon,
@@ -801,21 +802,7 @@ const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="px-6 py-12 bg-slate-900 border-t border-slate-800">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <DocumentDuplicateIcon className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold text-white">InvoiciFy</span>
-            </div>
-            <div className="text-gray-400">
-              © 2024 InvoiciFy. All rights reserved.
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

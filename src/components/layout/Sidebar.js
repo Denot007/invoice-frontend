@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -10,12 +10,31 @@ import {
   CogIcon,
   UserIcon,
   ArrowLeftOnRectangleIcon,
+  CalendarIcon,
+  TagIcon,
+  ClockIcon,
+  ReceiptPercentIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const location = useLocation();
   const { logout, user } = useAuth();
+
+  // Close sidebar on mobile when component mounts
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setIsOpen(false);
+      }
+    };
+
+    // Close on initial load if mobile
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [setIsOpen]);
 
   const navigation = [
     {
@@ -39,9 +58,29 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       icon: DocumentDuplicateIcon,
     },
     {
+      name: 'Items',
+      href: '/items',
+      icon: TagIcon,
+    },
+    {
+      name: 'Time Tracking',
+      href: '/time-tracking',
+      icon: ClockIcon,
+    },
+    {
+      name: 'Expenses',
+      href: '/expenses',
+      icon: ReceiptPercentIcon,
+    },
+    {
       name: 'Reports',
       href: '/reports',
       icon: ChartBarIcon,
+    },
+    {
+      name: 'Calendar',
+      href: '/calendar',
+      icon: CalendarIcon,
     },
     {
       name: 'Profile',
@@ -73,10 +112,10 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       <motion.div
         initial={false}
         animate={{
-          x: isOpen ? 0 : window.innerWidth >= 1024 ? 0 : -320,
+          x: isOpen ? 0 : window.innerWidth >= 1024 ? 0 : -256,
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="fixed left-0 top-0 bottom-0 w-80 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 z-30 lg:relative lg:translate-x-0 flex flex-col"
+        className="fixed left-0 top-0 bottom-0 w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 z-30 lg:relative lg:translate-x-0 flex flex-col"
       >
         {/* Logo */}
         <div className="flex items-center px-6 py-6 border-b border-gray-200 dark:border-gray-800">

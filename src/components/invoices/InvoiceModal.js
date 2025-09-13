@@ -15,6 +15,9 @@ import {
 } from '@heroicons/react/24/outline';
 
 import clientService from '../../services/clientService';
+import expenseService from '../../services/expenseService';
+import ItemSelector from '../items/ItemSelector';
+import ExpenseSelector from '../expenses/ExpenseSelector';
 
 const InvoiceModal = ({ isOpen, onClose, invoice, onSave, preSelectedClient }) => {
   const [formData, setFormData] = useState({
@@ -25,7 +28,7 @@ const InvoiceModal = ({ isOpen, onClose, invoice, onSave, preSelectedClient }) =
     description: '',
     issue_date: new Date().toISOString().split('T')[0],
     due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    items: [{ description: '', quantity: 1, unit_price: 0, total: 0 }],
+    items: [{ item: '', description: '', quantity: 1, unit_price: 0, total: 0 }],
     notes: '',
     terms: 'Net 30',
     tax_rate: 0,
@@ -62,6 +65,7 @@ const InvoiceModal = ({ isOpen, onClose, invoice, onSave, preSelectedClient }) =
       console.log('Invoice data received:', invoice);
       // Map from both Django API format and frontend format
       const mappedItems = (invoice.items || []).map(item => ({
+        item: item.item || '',
         description: item.description || '',
         quantity: parseFloat(item.quantity || 0),
         unit_price: parseFloat(item.unit_price || item.rate || 0),
@@ -76,7 +80,7 @@ const InvoiceModal = ({ isOpen, onClose, invoice, onSave, preSelectedClient }) =
         description: invoice.description || '',
         issue_date: invoice.issue_date || invoice.issueDate || new Date().toISOString().split('T')[0],
         due_date: invoice.due_date || invoice.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        items: mappedItems.length > 0 ? mappedItems : [{ description: '', quantity: 1, unit_price: 0, total: 0 }],
+        items: mappedItems.length > 0 ? mappedItems : [{ item: '', description: '', quantity: 1, unit_price: 0, total: 0 }],
         notes: invoice.notes || '',
         terms: invoice.terms || 'Net 30',
         tax_rate: parseFloat(invoice.tax_rate || invoice.tax || 0),
@@ -94,7 +98,7 @@ const InvoiceModal = ({ isOpen, onClose, invoice, onSave, preSelectedClient }) =
         description: '',
         issue_date: new Date().toISOString().split('T')[0],
         due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        items: [{ description: '', quantity: 1, unit_price: 0, total: 0 }],
+        items: [{ item: '', description: '', quantity: 1, unit_price: 0, total: 0 }],
         notes: '',
         terms: 'Net 30',
         tax_rate: 0,
@@ -162,7 +166,7 @@ const InvoiceModal = ({ isOpen, onClose, invoice, onSave, preSelectedClient }) =
   const addItem = () => {
     setFormData(prev => ({
       ...prev,
-      items: [...prev.items, { description: '', quantity: 1, unit_price: 0, total: 0 }],
+      items: [...prev.items, { item: '', description: '', quantity: 1, unit_price: 0, total: 0 }],
     }));
   };
 
@@ -188,6 +192,89 @@ const InvoiceModal = ({ isOpen, onClose, invoice, onSave, preSelectedClient }) =
     return subtotal + tax;
   };
 
+  const handleItemFromLibrary = (selectedItem) => {
+    const newItem = {
+      item: selectedItem.name,
+      description: selectedItem.description || '',
+      quantity: 1,
+      unit_price: parseFloat(selectedItem.unit_price) || 0,
+      total: parseFloat(selectedItem.unit_price) || 0,
+    };
+    
+    setFormData(prev => ({
+      ...prev,
+      items: [...prev.items, newItem],
+    }));
+  };
+
+  const handleExpensesSelected = async (selectedItems) => {
+    const { expenses, mileage } = selectedItems;
+    
+    try {
+      // Create a temporary invoice to get the items
+      if (invoice && invoice.id) {
+        // If editing existing invoice, add directly to the invoice
+        if (expenses.length > 0) {
+          await expenseService.addExpensesToInvoice(invoice.id, expenses);
+        }
+        if (mileage.length > 0) {
+          await expenseService.addMileageToInvoice(invoice.id, mileage);
+        }
+        toast.success('Expenses added to invoice successfully');
+        // Trigger parent to reload
+        onSave?.();
+      } else {
+        // If creating new invoice, get expense data and add as items to form
+        const allSelectedItems = [];
+        
+        if (expenses.length > 0) {
+          const expenseData = await expenseService.getClientExpenses(formData.clientId);
+          const selectedExpenseData = expenseData.expenses.filter(e => expenses.includes(e.id));
+          
+          for (const expense of selectedExpenseData) {
+            allSelectedItems.push({
+              item: expense.description || "Expense Reimbursement",
+              description: expense.description + (expense.vendor ? ` (${expense.vendor})` : ''),
+              quantity: 1,
+              unit_price: parseFloat(expense.total_amount),
+              total: parseFloat(expense.total_amount),
+              expense_id: expense.id,
+              expense_type: 'expense'
+            });
+          }
+        }
+        
+        if (mileage.length > 0) {
+          const mileageData = await expenseService.getClientMileage(formData.clientId);
+          const selectedMileageData = mileageData.mileage.filter(m => mileage.includes(m.id));
+          
+          for (const mile of selectedMileageData) {
+            allSelectedItems.push({
+              item: `Mileage: ${mile.description}` || "Mileage Reimbursement",
+              description: `Mileage: ${mile.description} (${mile.miles} miles @ $${mile.rate_per_mile}/mile)`,
+              quantity: 1,
+              unit_price: parseFloat(mile.total_amount),
+              total: parseFloat(mile.total_amount),
+              mileage_id: mile.id,
+              expense_type: 'mileage'
+            });
+          }
+        }
+        
+        // Add items to form
+        setFormData(prev => ({
+          ...prev,
+          items: [...prev.items, ...allSelectedItems],
+        }));
+        
+        toast.success(`Added ${allSelectedItems.length} expense item(s) to invoice`);
+      }
+    } catch (error) {
+      console.error('Error adding expenses to invoice:', error);
+      toast.error('Failed to add expenses to invoice');
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     
@@ -207,6 +294,10 @@ const InvoiceModal = ({ isOpen, onClose, invoice, onSave, preSelectedClient }) =
       return;
     }
     
+    // Extract expense and mileage IDs from items for later marking as invoiced
+    const expenseIds = formData.items.filter(item => item.expense_id).map(item => item.expense_id);
+    const mileageIds = formData.items.filter(item => item.mileage_id).map(item => item.mileage_id);
+
     // Map form data to Django model structure
     const invoiceData = {
       client: formData.clientId,
@@ -220,10 +311,14 @@ const InvoiceModal = ({ isOpen, onClose, invoice, onSave, preSelectedClient }) =
       tax_rate: parseFloat(formData.tax_rate) || 0,
       status: formData.status,
       items: formData.items.map(item => ({
+        item: item.item || '',
         description: item.description,
         quantity: parseFloat(item.quantity) || 0,
         unit_price: parseFloat(item.unit_price) || 0,
       })),
+      // Include expense tracking for post-creation marking
+      _expenseIds: expenseIds,
+      _mileageIds: mileageIds,
     };
 
     // Add initial payment data if provided
@@ -414,73 +509,99 @@ const InvoiceModal = ({ isOpen, onClose, invoice, onSave, preSelectedClient }) =
                       </div>
                     )}
 
-                    {/* Line Items */}
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    {/* Line Items Section - Made More Visible */}
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                      <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-4 flex items-center">
+                        <DocumentTextIcon className="h-5 w-5 mr-2" />
                         Line Items
                       </h3>
-                      <div className="space-y-2">
-                        <div className="grid grid-cols-12 gap-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                          <div className="col-span-5">Description</div>
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-12 gap-3 text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase bg-gray-100 dark:bg-gray-800 p-2 rounded">
+                          <div className="col-span-2">Item</div>
+                          <div className="col-span-3">Description</div>
                           <div className="col-span-2">Quantity</div>
                           <div className="col-span-2">Unit Price</div>
                           <div className="col-span-2">Total</div>
-                          <div className="col-span-1"></div>
+                          <div className="col-span-1">Action</div>
                         </div>
                         {formData.items.map((item, index) => (
                           <motion.div
                             key={index}
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="grid grid-cols-12 gap-2"
+                            className="grid grid-cols-12 gap-3 bg-white dark:bg-gray-800 p-2 rounded border border-gray-200 dark:border-gray-700"
                           >
+                            <input
+                              type="text"
+                              value={item.item}
+                              onChange={(e) => handleItemChange(index, 'item', e.target.value)}
+                              className="col-span-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-sm"
+                              placeholder="Item name"
+                              required
+                            />
                             <input
                               type="text"
                               value={item.description}
                               onChange={(e) => handleItemChange(index, 'description', e.target.value)}
-                              className="col-span-5 input text-sm"
-                              placeholder="Item description"
+                              className="col-span-3 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-sm"
+                              placeholder="Description"
                               required
                             />
                             <input
                               type="number"
                               value={item.quantity}
                               onChange={(e) => handleItemChange(index, 'quantity', parseFloat(e.target.value) || 0)}
-                              className="col-span-2 input text-sm"
+                              className="col-span-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-sm"
                               min="0"
                               step="0.01"
+                              placeholder="Qty"
                               required
                             />
                             <input
                               type="number"
                               value={item.unit_price}
                               onChange={(e) => handleItemChange(index, 'unit_price', parseFloat(e.target.value) || 0)}
-                              className="col-span-2 input text-sm"
+                              className="col-span-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-sm"
                               min="0"
                               step="0.01"
+                              placeholder="Price"
                               required
                             />
-                            <div className="col-span-2 input text-sm bg-gray-100 dark:bg-gray-700">
+                            <div className="col-span-2 px-3 py-2 bg-gray-100 dark:bg-gray-600 border rounded-lg text-sm font-medium text-gray-800 dark:text-gray-200 flex items-center">
                               ${item.total.toFixed(2)}
                             </div>
                             <button
                               type="button"
                               onClick={() => removeItem(index)}
-                              className="col-span-1 p-2 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                              className="col-span-1 flex items-center justify-center p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                              title="Remove item"
                             >
-                              <TrashIcon className="h-5 w-5" />
+                              <TrashIcon className="h-4 w-4" />
                             </button>
                           </motion.div>
                         ))}
                       </div>
-                      <button
-                        type="button"
-                        onClick={addItem}
-                        className="mt-3 btn-secondary flex items-center text-sm"
-                      >
-                        <PlusIcon className="h-4 w-4 mr-1" />
-                        Add Item
-                      </button>
+                      <div className="mt-4 flex space-x-3">
+                        <button
+                          type="button"
+                          onClick={addItem}
+                          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                        >
+                          <PlusIcon className="h-4 w-4 mr-2" />
+                          Add Empty Item
+                        </button>
+                        
+                        <ItemSelector
+                          onItemSelect={handleItemFromLibrary}
+                          buttonClassName="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
+                        />
+                        
+                        <ExpenseSelector
+                          clientId={formData.clientId}
+                          onExpensesSelected={handleExpensesSelected}
+                          buttonClassName="inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
+                        />
+                      </div>
                     </div>
 
                     {/* Totals */}

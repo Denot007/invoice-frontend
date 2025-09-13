@@ -661,13 +661,41 @@ const Invoices = () => {
         invoice={selectedInvoice}
         onSave={async (invoiceData) => {
           try {
+            let savedInvoice;
             if (selectedInvoice) {
               // Update existing invoice
-              await invoiceService.updateInvoice(selectedInvoice._id || selectedInvoice.id, invoiceData);
+              savedInvoice = await invoiceService.updateInvoice(selectedInvoice._id || selectedInvoice.id, invoiceData);
             } else {
               // Add new invoice
-              await invoiceService.createInvoice(invoiceData);
+              const result = await invoiceService.createInvoice(invoiceData);
+              savedInvoice = result.success ? result.data : result;
             }
+            
+            // Mark expenses and mileage as invoiced if they were added during creation
+            if (invoiceData._expenseIds && invoiceData._expenseIds.length > 0) {
+              try {
+                const { default: expenseService } = await import('../services/expenseService');
+                await expenseService.addExpensesToInvoice(savedInvoice.id, invoiceData._expenseIds);
+                console.log('Marked expenses as invoiced:', invoiceData._expenseIds);
+              } catch (expenseError) {
+                console.error('Error marking expenses as invoiced:', expenseError);
+                // Don't fail the whole operation, just warn
+                toast.warning('Invoice created but failed to mark some expenses as invoiced');
+              }
+            }
+            
+            if (invoiceData._mileageIds && invoiceData._mileageIds.length > 0) {
+              try {
+                const { default: expenseService } = await import('../services/expenseService');
+                await expenseService.addMileageToInvoice(savedInvoice.id, invoiceData._mileageIds);
+                console.log('Marked mileage as invoiced:', invoiceData._mileageIds);
+              } catch (mileageError) {
+                console.error('Error marking mileage as invoiced:', mileageError);
+                // Don't fail the whole operation, just warn
+                toast.warning('Invoice created but failed to mark some mileage as invoiced');
+              }
+            }
+            
             await fetchInvoices();
             setIsModalOpen(false);
             setSelectedInvoice(null);

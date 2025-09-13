@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Bars3Icon,
@@ -6,6 +6,8 @@ import {
   MoonIcon,
   SunIcon,
   MagnifyingGlassIcon,
+  ArrowsPointingOutIcon,
+  ArrowsPointingInIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -13,6 +15,38 @@ import { useTheme } from '../../context/ThemeContext';
 const Header = ({ setSidebarOpen }) => {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const [isFullScreen, setIsFullScreen] = useState(false);
+
+  // Fullscreen functionality
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => {
+        setIsFullScreen(true);
+      }).catch(err => {
+        console.log('Error attempting to enable fullscreen:', err);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().then(() => {
+          setIsFullScreen(false);
+        }).catch(err => {
+          console.log('Error attempting to exit fullscreen:', err);
+        });
+      }
+    }
+  };
+
+  // Listen for fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullScreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   return (
     <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
@@ -44,6 +78,21 @@ const Header = ({ setSidebarOpen }) => {
 
           {/* Right side */}
           <div className="flex items-center space-x-3">
+            {/* Fullscreen toggle */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={toggleFullScreen}
+              className="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              title={isFullScreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+            >
+              {isFullScreen ? (
+                <ArrowsPointingInIcon className="h-5 w-5" />
+              ) : (
+                <ArrowsPointingOutIcon className="h-5 w-5" />
+              )}
+            </motion.button>
+
             {/* Theme toggle */}
             <motion.button
               whileHover={{ scale: 1.05 }}
