@@ -1,0 +1,25 @@
+<!-- InvoiceGear Logo Concept 2: Clean Professional Gear -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
+  <defs>
+    <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1E40AF;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Professional Gear Icon -->
+  <g transform="translate(30, 30)">
+    <!-- Outer gear -->
+    <path d="M -2.5,-20 L 2.5,-20 L 4,-15 L 10,-13 L 13,-10 L 15,-4 L 20,-2.5 L 20,2.5 L 15,4 L 13,10 L 10,13 L 4,15 L 2.5,20 L -2.5,20 L -4,15 L -10,13 L -13,10 L -15,4 L -20,2.5 L -20,-2.5 L -15,-4 L -13,-10 L -10,-13 L -4,-15 Z"
+          fill="url(#blueGradient)" stroke="#1E40AF" stroke-width="0.5" />
+
+    <!-- Inner circle -->
+    <circle cx="0" cy="0" r="7" fill="white" />
+    <circle cx="0" cy="0" r="4" fill="#3B82F6" />
+  </g>
+
+  <!-- Modern Typography -->
+  <text x="60" y="36" font-family="'Inter', 'Helvetica Neue', sans-serif" font-size="22" font-weight="700">
+    <tspan fill="#1F2937">Invoice</tspan><tspan fill="#3B82F6">Gear</tspan>
+  </text>
+</svg>

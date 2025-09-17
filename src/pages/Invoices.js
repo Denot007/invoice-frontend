@@ -20,6 +20,7 @@ import QuickPaymentModal from '../components/invoices/QuickPaymentModal';
 import InvoiceActionsModal from '../components/invoices/InvoiceActionsModal';
 import DeleteConfirmModal from '../components/common/DeleteConfirmModal';
 import invoiceService from '../services/invoiceService';
+import documentService from '../services/documentService';
 import { useAuth } from '../context/AuthContext';
 
 const Invoices = () => {
@@ -89,6 +90,25 @@ const Invoices = () => {
     }
   };
 
+  const getStatusBackgroundColor = (status) => {
+    switch (status) {
+      case 'paid':
+        return 'bg-green-100 dark:bg-green-900/20 hover:bg-green-200 dark:hover:bg-green-900/30';
+      case 'sent':
+        return 'bg-blue-100 dark:bg-blue-900/20 hover:bg-blue-200 dark:hover:bg-blue-900/30';
+      case 'partial':
+        return 'bg-yellow-100 dark:bg-yellow-900/20 hover:bg-yellow-200 dark:hover:bg-yellow-900/30';
+      case 'overdue':
+        return 'bg-red-100 dark:bg-red-900/20 hover:bg-red-200 dark:hover:bg-red-900/30';
+      case 'cancelled':
+        return 'bg-gray-100 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-800/70';
+      case 'draft':
+        return 'bg-slate-100 dark:bg-slate-900/20 hover:bg-slate-200 dark:hover:bg-slate-900/30';
+      default:
+        return 'bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800';
+    }
+  };
+
   const getInvoiceBalance = (invoice) => {
     if (!invoice) return 0;
     
@@ -125,7 +145,7 @@ const Invoices = () => {
       'paid': 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
       'partial': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
       'overdue': 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
-      'cancelled': 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
+      'cancelled': 'bg-pink-100 text-pink-800 dark:bg-pink-900/20 dark:text-pink-400'
     };
 
     return (
@@ -260,13 +280,9 @@ const Invoices = () => {
   const handleDownloadPDF = async (invoice) => {
     try {
       const invoiceId = invoice.id || invoice._id;
-      const result = await invoiceService.exportInvoicePDF(invoiceId);
-      
-      if (result.success) {
-        toast.success(result.message || 'Invoice PDF downloaded successfully!');
-      } else {
-        throw new Error(result.error || 'Failed to download PDF');
-      }
+      // Use documentService instead of invoiceService to get template system
+      await documentService.downloadInvoicePDF(invoiceId, null, `invoice-${invoice.invoice_number}.pdf`);
+      toast.success('Invoice PDF downloaded successfully!');
     } catch (error) {
       console.error('Error downloading PDF:', error);
       toast.error(error.message || 'Failed to download PDF. Please try again.');
@@ -544,7 +560,7 @@ const Invoices = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ delay: index * 0.05 }}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    className={`${getStatusBackgroundColor(invoice.status || 'draft')} transition-colors`}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <input
@@ -554,13 +570,13 @@ const Invoices = () => {
                         className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                       />
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap ">
                       <div className="flex items-center">
                         {getStatusIcon(invoice.status || 'draft')}
                         <select
                           value={invoice.status || 'draft'}
                           onChange={(e) => handleStatusChange(invoice, e.target.value)}
-                          className="ml-2 text-xs font-medium border-0 bg-transparent focus:ring-0 focus:outline-none text-gray-900 dark:text-white cursor-pointer"
+                          className="ml-2 text-xs font-medium border-0 bg-transparent focus:ring-0 focus:outline-none text-gray-900 dark:text-white cursor-pointer border-r-2 border-purple-600 dark:border-purple-700 rounded-full px-2 py-1"
                         >
                           <option value="draft">Draft</option>
                           <option value="sent">Sent</option>
@@ -575,9 +591,7 @@ const Invoices = () => {
                       <div className="text-sm font-medium text-gray-900 dark:text-white">
                         {invoice.invoiceNumber || invoice.invoice_number || 'No number'}
                       </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {getStatusBadge(invoice)}
-                      </div>
+                     
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900 dark:text-white">

@@ -62,7 +62,7 @@ const itemService = {
   // Get all items with optional filters
   getItems: async (params = {}) => {
     try {
-      const response = await api.get('/api/items/', { params });
+      const response = await api.get('/items/', { params });
       return { success: true, data: response.data };
     } catch (error) {
       console.error('Error fetching items:', error);
@@ -73,7 +73,7 @@ const itemService = {
   // Get single item
   getItem: async (id) => {
     try {
-      const response = await api.get(`/api/items/${id}/`);
+      const response = await api.get(`/items/${id}/`);
       return { success: true, data: response.data };
     } catch (error) {
       console.error('Error fetching item:', error);
@@ -84,7 +84,7 @@ const itemService = {
   // Create new item
   createItem: async (itemData) => {
     try {
-      const response = await api.post('/api/items/', itemData);
+      const response = await api.post('/items/', itemData);
       return { success: true, data: response.data };
     } catch (error) {
       console.error('Error creating item:', error);
@@ -95,7 +95,7 @@ const itemService = {
   // Update item
   updateItem: async (id, itemData) => {
     try {
-      const response = await api.put(`/api/items/${id}/`, itemData);
+      const response = await api.put(`/items/${id}/`, itemData);
       return { success: true, data: response.data };
     } catch (error) {
       console.error('Error updating item:', error);
@@ -106,7 +106,7 @@ const itemService = {
   // Delete item
   deleteItem: async (id) => {
     try {
-      await api.delete(`/api/items/${id}/`);
+      await api.delete(`/items/${id}/`);
       return { success: true };
     } catch (error) {
       console.error('Error deleting item:', error);
@@ -117,7 +117,7 @@ const itemService = {
   // Get categories
   getCategories: async () => {
     try {
-      const response = await api.get('/api/items/categories/');
+      const response = await api.get('/items/categories/');
       return { success: true, data: response.data.categories };
     } catch (error) {
       console.error('Error fetching categories:', error);

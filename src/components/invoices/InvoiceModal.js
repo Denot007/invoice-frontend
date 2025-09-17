@@ -7,7 +7,6 @@ import {
   PlusIcon,
   TrashIcon,
   CalculatorIcon,
- 
   UserGroupIcon,
   DocumentTextIcon,
   CurrencyDollarIcon,
@@ -42,21 +41,23 @@ const InvoiceModal = ({ isOpen, onClose, invoice, onSave, preSelectedClient }) =
 
   const [clients, setClients] = useState([]);
 
-  // Load clients when modal opens
+  // Load clients and templates when modal opens
   useEffect(() => {
-    const loadClients = async () => {
+    const loadData = async () => {
       try {
-        const result = await clientService.getClients({ status: 'active' });
-        if (result.success) {
-          setClients(result.data || []);
+        // Load clients
+        const clientResult = await clientService.getClients({ status: 'active' });
+        if (clientResult.success) {
+          setClients(clientResult.data || []);
         }
+
       } catch (error) {
-        console.error('Error loading clients:', error);
+        console.error('Error loading data:', error);
       }
     };
 
     if (isOpen) {
-      loadClients();
+      loadData();
     }
   }, [isOpen]);
 
@@ -338,7 +339,8 @@ const InvoiceModal = ({ isOpen, onClose, invoice, onSave, preSelectedClient }) =
   };
 
   return (
-    <Transition appear show={isOpen} as={Fragment}>
+    <>
+      <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
         <Transition.Child
           as={Fragment}
@@ -780,21 +782,23 @@ const InvoiceModal = ({ isOpen, onClose, invoice, onSave, preSelectedClient }) =
                   </div>
 
                   {/* Footer */}
-                  <div className="bg-gray-50 dark:bg-gray-700/50 px-6 py-4 flex items-center justify-end space-x-3">
-                    <button
-                      type="button"
-                      onClick={onClose}
-                      className="btn-secondary"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="btn-primary flex items-center"
-                    >
-                      <CalculatorIcon className="h-5 w-5 mr-2" />
-                      {invoice ? 'Update Invoice' : 'Create Invoice'}
-                    </button>
+                  <div className="bg-gray-50 dark:bg-gray-700/50 px-6 py-4">
+                    <div className="flex items-center justify-end space-x-3">
+                      <button
+                        type="button"
+                        onClick={onClose}
+                        className="btn-secondary"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="btn-primary flex items-center"
+                      >
+                        <CalculatorIcon className="h-5 w-5 mr-2" />
+                        {invoice ? 'Update Invoice' : 'Create Invoice'}
+                      </button>
+                    </div>
                   </div>
                 </form>
               </Dialog.Panel>
@@ -802,7 +806,10 @@ const InvoiceModal = ({ isOpen, onClose, invoice, onSave, preSelectedClient }) =
           </div>
         </div>
       </Dialog>
-    </Transition>
+      </Transition>
+      
+      {/* Template Manager Modal */}
+    </>
   );
 };
 

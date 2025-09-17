@@ -8,14 +8,17 @@ import {
   MagnifyingGlassIcon,
   ArrowsPointingOutIcon,
   ArrowsPointingInIcon,
+  CalculatorIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import Calculator from '../Calculator';
 
 const Header = ({ setSidebarOpen }) => {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [showCalculator, setShowCalculator] = useState(false);
 
   // Fullscreen functionality
   const toggleFullScreen = () => {
@@ -93,6 +96,17 @@ const Header = ({ setSidebarOpen }) => {
               )}
             </motion.button>
 
+            {/* Calculator */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowCalculator(true)}
+              className="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              title="Calculator"
+            >
+              <CalculatorIcon className="h-5 w-5" />
+            </motion.button>
+
             {/* Theme toggle */}
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -151,6 +165,12 @@ const Header = ({ setSidebarOpen }) => {
           </div>
         </div>
       </div>
+
+      {/* Calculator Modal */}
+      <Calculator
+        isOpen={showCalculator}
+        onClose={() => setShowCalculator(false)}
+      />
     </header>
   );
 };

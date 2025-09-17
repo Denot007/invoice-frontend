@@ -115,7 +115,7 @@ const LandingPage = () => {
       role: 'Freelance Designer',
       avatar: 'SJ',
       rating: 5,
-      text: 'InvoiciFy has transformed how I manage my freelance business. The mobile app is incredibly convenient!'
+      text: 'InvoiceGear has transformed how I manage my freelance business. The mobile app is incredibly convenient!'
     },
     {
       name: 'Mark Rodriguez',
@@ -147,10 +147,7 @@ const LandingPage = () => {
             whileHover={{ scale: 1.05 }}
             className="flex items-center space-x-2"
           >
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <DocumentDuplicateIcon className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-white">InvoiciFy</span>
+            <img src="/invoicegear-logo-light.svg" alt="InvoiceGear" className="h-10 w-auto" />
           </motion.div>
           
           <div className="hidden md:flex items-center space-x-8">
@@ -213,7 +210,7 @@ const LandingPage = () => {
                 className="text-5xl lg:text-7xl font-bold text-white leading-tight"
               >
                 Invoice Like a
-                <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-cyan-300 to-blue-400 bg-clip-text text-transparent">
                   {' '}Pro
                 </span>
               </motion.h1>
@@ -327,7 +324,7 @@ const LandingPage = () => {
           >
             <h2 className="text-4xl lg:text-6xl font-bold text-white mb-6">
               Everything You Need to
-              <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-cyan-300 to-blue-400 bg-clip-text text-transparent">
                 {' '}Succeed
               </span>
             </h2>
@@ -657,10 +654,10 @@ const LandingPage = () => {
               viewport={{ once: true }}
             >
               <h2 className="text-4xl lg:text-5xl font-bold text-white mb-8">
-                Why Choose InvoiciFy?
+                Why Choose InvoiceGear?
               </h2>
               <p className="text-xl text-gray-300 mb-8 leading-relaxed">
-                Join thousands of businesses that trust InvoiciFy to manage their invoicing and payments.
+                Join thousands of businesses that trust InvoiceGear to manage their invoicing and payments.
               </p>
               
               <motion.div
@@ -731,7 +728,7 @@ const LandingPage = () => {
               Loved by Businesses Worldwide
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              See what our customers have to say about InvoiciFy
+              See what our customers have to say about InvoiceGear
             </p>
           </motion.div>
 
@@ -784,7 +781,7 @@ const LandingPage = () => {
               Ready to Get Started?
             </h2>
             <p className="text-xl text-blue-100 max-w-2xl mx-auto">
-              Join thousands of businesses already using InvoiciFy to streamline their invoicing process.
+              Join thousands of businesses already using InvoiceGear to streamline their invoicing process.
             </p>
             <motion.button
               whileHover={{ 

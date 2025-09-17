@@ -23,6 +23,7 @@ import Profile from './pages/Profile';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import Calendar from './pages/Calendar';
+import FileManager from './pages/FileManager';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import ContactUs from './pages/ContactUs';
@@ -212,6 +213,16 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Calendar />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/files"
+                  element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <FileManager />
+                      </Layout>
                     </ProtectedRoute>
                   }
                 />

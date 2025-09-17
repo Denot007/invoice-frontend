@@ -6,7 +6,7 @@ import {
   PlusIcon,
   TrashIcon,
   CalculatorIcon,
-  
+ 
   UserGroupIcon,
   DocumentDuplicateIcon,
 } from '@heroicons/react/24/outline';
@@ -87,6 +87,7 @@ const EstimateModal = ({ isOpen, onClose, estimate, onSave }) => {
       fetchClients();
     }
   }, [isOpen]);
+
 
   const handleClientSelect = (e) => {
     const selectedValue = e.target.value;
@@ -234,6 +235,7 @@ const EstimateModal = ({ isOpen, onClose, estimate, onSave }) => {
   };
 
   return (
+    <>
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
         <Transition.Child
@@ -313,6 +315,7 @@ const EstimateModal = ({ isOpen, onClose, estimate, onSave }) => {
                           ))}
                         </select>
                       </div>
+
                     </div>
 
                     {/* Title and Description */}
@@ -572,6 +575,7 @@ const EstimateModal = ({ isOpen, onClose, estimate, onSave }) => {
                     </div>
                   </div>
 
+
                   {/* Footer */}
                   <div className="bg-gray-50 dark:bg-gray-700/50 px-6 py-4 flex items-center justify-end space-x-3">
                     <button
@@ -596,6 +600,8 @@ const EstimateModal = ({ isOpen, onClose, estimate, onSave }) => {
         </div>
       </Dialog>
     </Transition>
+
+    </>
   );
 };
 

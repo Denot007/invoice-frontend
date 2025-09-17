@@ -10,6 +10,8 @@ import {
   UserIcon,
   TagIcon,
   ExclamationTriangleIcon,
+  EyeIcon,
+  PaperClipIcon,
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import expenseService from '../services/expenseService';
@@ -17,6 +19,367 @@ import invoiceService from '../services/invoiceService';
 import { useAuth } from '../context/AuthContext';
 import { formatCurrency } from '../utils/formatters';
 import { toast } from 'react-toastify';
+
+// Receipt Upload Modal Component
+const ReceiptUploadModal = ({ onClose, onReceiptScanned, scanning, setIsScanning: setParentScanning }) => {
+  const [dragActive, setDragActive] = useState(false);
+  const [scanResult, setScanResult] = useState(null);
+  const [showDebug, setShowDebug] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const fileInputRef = useRef(null);
+
+  const handleReceiptScan = async (file) => {
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Please upload JPG, PNG, or PDF files only.');
+      return;
+    }
+
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      toast.error('File too large. Maximum size is 10MB.');
+      return;
+    }
+
+    setParentScanning(true);
+
+    try {
+      const result = await expenseService.scanReceipt(file);
+      console.log('Full scan result:', result);
+      setScanResult(result);
+      toast.success('Receipt scanned successfully!');
+      // Don't auto-close, let user see the debug info first
+    } catch (error) {
+      console.error('Receipt scanning error:', error);
+      const errorMessage = error.response?.data?.error || 'Failed to scan receipt. Please try again.';
+      toast.error(errorMessage);
+      setParentScanning(false);
+    }
+  };
+
+  const handleTextExtraction = async (file) => {
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Please upload JPG, PNG, or PDF files only.');
+      return;
+    }
+
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      toast.error('File too large. Maximum size is 10MB.');
+      return;
+    }
+
+    setParentScanning(true);
+
+    try {
+      const result = await expenseService.extractText(file);
+      console.log('Text extraction result:', result);
+      // Create a mock scan result with just the extracted text for display
+      setScanResult({
+        ...result,
+        debug: {
+          extracted_text: result.extracted_text,
+          file_type: result.file_type,
+          text_length: result.text_length,
+          pages_processed: result.pages_processed,
+          success: result.success
+        }
+      });
+      toast.success('Text extracted successfully!');
+    } catch (error) {
+      console.error('Text extraction error:', error);
+      const errorMessage = error.response?.data?.error || 'Failed to extract text. Please try again.';
+      toast.error(errorMessage);
+      setParentScanning(false);
+    }
+  };
+
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+
+      // Validate file type and size
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+      if (!allowedTypes.includes(file.type)) {
+        toast.error('Please upload JPG, PNG, or PDF files only.');
+        return;
+      }
+
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        toast.error('File too large. Maximum size is 10MB.');
+        return;
+      }
+
+      setSelectedFile(file);
+    }
+  };
+
+  const handleFileSelect = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+
+      // Validate file type and size
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+      if (!allowedTypes.includes(file.type)) {
+        toast.error('Please upload JPG, PNG, or PDF files only.');
+        return;
+      }
+
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        toast.error('File too large. Maximum size is 10MB.');
+        return;
+      }
+
+      setSelectedFile(file);
+    }
+  };
+
+  const handleUseResult = () => {
+    if (scanResult) {
+      onReceiptScanned(scanResult);
+      onClose();
+    }
+  };
+
+  const handleRetry = () => {
+    setScanResult(null);
+    setSelectedFile(null);
+    setParentScanning(false);
+    setShowDebug(false);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        className={`bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full mx-4 ${scanResult ? 'max-w-4xl' : 'max-w-md'}`}
+      >
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {scanResult ? 'Receipt Scan Results' : 'Upload Receipt'}
+            </h3>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            >
+              <XMarkIcon className="h-6 w-6" />
+            </button>
+          </div>
+
+          {scanResult ? (
+            // Show scan results and debug information
+            <div className="space-y-6">
+              {/* Success message */}
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                <div className="flex items-center">
+                  <CheckCircleIcon className="h-5 w-5 text-green-500 mr-2" />
+                  <p className="text-green-800 dark:text-green-200 font-medium">
+                    Receipt scanned successfully! Confidence: {scanResult.confidence}
+                  </p>
+                </div>
+              </div>
+
+              {/* Extracted Data Preview */}
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                <h4 className="font-medium text-gray-900 dark:text-white mb-3">Extracted Data:</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div><span className="font-medium">Vendor:</span> {scanResult.vendor}</div>
+                  <div><span className="font-medium">Amount:</span> ${scanResult.amount}</div>
+                  <div><span className="font-medium">Date:</span> {scanResult.expense_date}</div>
+                  <div><span className="font-medium">Category:</span> {scanResult.category_name || 'None'}</div>
+                  <div className="col-span-2"><span className="font-medium">Description:</span> {scanResult.description}</div>
+                  {scanResult.location && <div className="col-span-2"><span className="font-medium">Location:</span> {scanResult.location}</div>}
+                </div>
+              </div>
+
+              {/* Debug Information Toggle */}
+              <div>
+                <button
+                  onClick={() => setShowDebug(!showDebug)}
+                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                >
+                  {showDebug ? 'Hide' : 'Show'} Debug Information
+                </button>
+              </div>
+
+              {/* Debug Information */}
+              {showDebug && scanResult.debug && (
+                <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 space-y-4">
+                  <div>
+                    <h5 className="font-medium text-gray-900 dark:text-white mb-2">File Type: {scanResult.debug.file_type}</h5>
+                    <h5 className="font-medium text-gray-900 dark:text-white mb-2">Model Used: {scanResult.debug.model_used}</h5>
+                  </div>
+
+                  {scanResult.debug.extracted_text !== 'N/A (Image file)' && (
+                    <div>
+                      <h5 className="font-medium text-gray-900 dark:text-white mb-2">Extracted Text:</h5>
+                      <pre className="bg-white dark:bg-gray-900 p-3 rounded border text-xs overflow-auto max-h-32">
+                        {scanResult.debug.extracted_text}
+                      </pre>
+                    </div>
+                  )}
+
+                  <div>
+                    <h5 className="font-medium text-gray-900 dark:text-white mb-2">Raw Grok Response:</h5>
+                    <pre className="bg-white dark:bg-gray-900 p-3 rounded border text-xs overflow-auto max-h-32">
+                      {scanResult.debug.grok_raw_response}
+                    </pre>
+                  </div>
+
+                  <div>
+                    <h5 className="font-medium text-gray-900 dark:text-white mb-2">Parsed JSON Data:</h5>
+                    <pre className="bg-white dark:bg-gray-900 p-3 rounded border text-xs overflow-auto max-h-32">
+                      {JSON.stringify(scanResult.debug.grok_parsed_data, null, 2)}
+                    </pre>
+                  </div>
+
+                  <div>
+                    <h5 className="font-medium text-gray-900 dark:text-white mb-2">Available Categories:</h5>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                      {scanResult.debug.available_categories?.join(', ')}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-600">
+                <button
+                  onClick={handleRetry}
+                  className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                >
+                  Retry
+                </button>
+                <button
+                  onClick={handleUseResult}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                >
+                  Use This Data
+                </button>
+              </div>
+            </div>
+          ) : selectedFile ? (
+            // Show file actions
+            <div className="space-y-6">
+              {/* File info */}
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                <h4 className="font-medium text-gray-900 dark:text-white mb-2">Selected File:</h4>
+                <div className="text-sm space-y-1">
+                  <div><span className="font-medium">Name:</span> {selectedFile.name}</div>
+                  <div><span className="font-medium">Type:</span> {selectedFile.type}</div>
+                  <div><span className="font-medium">Size:</span> {(selectedFile.size / 1024 / 1024).toFixed(2)} MB</div>
+                </div>
+              </div>
+
+              {/* Action buttons */}
+              {scanning ? (
+                <div className="flex flex-col items-center py-8">
+                  <svg className="animate-spin h-8 w-8 text-purple-600 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <p className="text-purple-600 font-medium">Processing...</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">This may take a few moments</p>
+                </div>
+              ) : (
+                <div className="flex flex-col space-y-3">
+                  <button
+                    onClick={() => handleReceiptScan(selectedFile)}
+                    className="w-full px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
+                  >
+                    🤖 Scan with AI (Full Processing)
+                  </button>
+                  <button
+                    onClick={() => handleTextExtraction(selectedFile)}
+                    className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                  >
+                    📄 Extract Text Only (Debug)
+                  </button>
+                  <button
+                    onClick={() => setSelectedFile(null)}
+                    className="w-full px-4 py-3 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    ↺ Choose Different File
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            // Show upload interface
+            <>
+              <div
+                className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                  dragActive
+                    ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                    : 'border-gray-300 dark:border-gray-600 hover:border-purple-400'
+                }`}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+              >
+                <DocumentArrowUpIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                  Drop your receipt here
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                  or click to browse files
+                </p>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                  >
+                    <DocumentArrowUpIcon className="h-4 w-4 mr-2" />
+                    Select File
+                  </button>
+                  <div className="text-xs text-gray-400">
+                    Or drag and drop files here
+                  </div>
+                </div>
+                <p className="text-xs text-gray-400 mt-3">
+                  Supports JPG, PNG, and PDF files (max 10MB)
+                </p>
+              </div>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,application/pdf"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+            </>
+          )}
+        </div>
+      </motion.div>
+    </div>
+  );
+};
 
 const Expenses = () => {
   const { user } = useAuth();
@@ -37,6 +400,8 @@ const Expenses = () => {
   const [selectedExpense, setSelectedExpense] = useState(null);
   const [selectedExpenseIds, setSelectedExpenseIds] = useState([]);
   const [selectedMileageIds, setSelectedMileageIds] = useState([]);
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
+  const [scannedData, setScannedData] = useState(null);
   const [showAutoCreateOption, setShowAutoCreateOption] = useState(false);
   const [autoCreateClientId, setAutoCreateClientId] = useState('');
   const [autoCreateClientName, setAutoCreateClientName] = useState('');
@@ -56,6 +421,7 @@ const Expenses = () => {
   const [activeTab, setActiveTab] = useState('expenses'); // 'expenses', 'mileage', 'categories'
   const [summary, setSummary] = useState({});
   const [mileageSummary, setMileageSummary] = useState({});
+  const [isScanning, setIsScanning] = useState(false);
 
   const [expenseForm, setExpenseForm] = useState({
     description: '',
@@ -231,6 +597,294 @@ const Expenses = () => {
       console.error('Error loading clients:', error);
       // Set empty array on error
       setClients([]);
+    }
+  };
+
+  const handleScanReceipt = async () => {
+    if (!expenseForm.receipt_file) {
+      toast.error('Please select a receipt file first');
+      return;
+    }
+
+    setIsScanning(true);
+    try {
+      const scannedData = await expenseService.scanReceipt(expenseForm.receipt_file);
+
+      // Check if expense was automatically created
+      if (scannedData.expense_created) {
+        // Expense was automatically created - show success and refresh data
+        const confidenceColor = {
+          'High': 'text-green-600',
+          'Medium': 'text-yellow-600',
+          'Low': 'text-red-600'
+        }[scannedData.confidence] || 'text-gray-600';
+
+        toast.success(
+          <div>
+            <p className="font-semibold">Expense automatically created!</p>
+            <p className="text-sm">Vendor: {scannedData.vendor}</p>
+            <p className="text-sm">Amount: ${scannedData.amount}</p>
+            <p className={`text-sm ${confidenceColor}`}>
+              AI Confidence: {scannedData.confidence}
+            </p>
+          </div>,
+          { autoClose: 6000 }
+        );
+
+        // Close the modal and refresh the data
+        setShowModal(false);
+        resetForm();
+        await loadData();
+
+      } else {
+        // Expense creation failed or was disabled - populate form for manual creation
+        setExpenseForm(prev => ({
+          ...prev,
+          vendor: scannedData.vendor || prev.vendor,
+          amount: scannedData.amount || prev.amount,
+          expense_date: scannedData.expense_date || prev.expense_date,
+          description: scannedData.description || prev.description,
+          location: scannedData.location || prev.location,
+          tax_amount: scannedData.tax_amount || prev.tax_amount,
+          payment_method: scannedData.payment_method || prev.payment_method,
+          reference_number: scannedData.reference_number || prev.reference_number,
+          category: scannedData.category_id || prev.category,
+        }));
+
+        // Show appropriate message based on whether it was an error or just populated data
+        const confidenceColor = {
+          'High': 'text-green-600',
+          'Medium': 'text-yellow-600',
+          'Low': 'text-red-600'
+        }[scannedData.confidence] || 'text-gray-600';
+
+        if (scannedData.success === false && scannedData.error_details) {
+          // There was an error creating the expense - show warning
+          toast.warning(
+            <div>
+              <p className="font-semibold">Data extracted but expense creation failed</p>
+              <p className="text-xs text-gray-600 mt-1">{scannedData.message}</p>
+              <p className={`text-sm ${confidenceColor} mt-1`}>
+                Confidence: {scannedData.confidence}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                Please review the data and save manually.
+              </p>
+            </div>,
+            { autoClose: 7000 }
+          );
+        } else {
+          // Normal extraction for manual creation
+          toast.success(
+            <div>
+              <p>Receipt scanned successfully!</p>
+              <p className={`text-sm ${confidenceColor}`}>
+                Confidence: {scannedData.confidence}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                Please review the extracted data before saving.
+              </p>
+            </div>,
+            { autoClose: 5000 }
+          );
+        }
+      }
+
+      // Store scan result for debug display
+      setScanResult(scannedData);
+
+    } catch (error) {
+      console.error('Receipt scanning error:', error);
+
+      // Check if it's a timeout error
+      if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+        toast.warning(
+          <div>
+            <p className="font-semibold">Scan may be taking longer than expected</p>
+            <p className="text-sm">The receipt is still being processed. Please check your expenses list in a moment.</p>
+            <p className="text-xs text-gray-500 mt-1">If the expense appears, the scan was successful.</p>
+          </div>,
+          { autoClose: 8000 }
+        );
+      } else {
+        // Regular error handling
+        toast.error(
+          error.response?.data?.error ||
+          'Failed to scan receipt. Please check the file and try again.'
+        );
+      }
+    } finally {
+      setIsScanning(false);
+    }
+  };
+
+  const handleDirectAIScan = () => {
+    // Trigger file input for direct upload
+    document.getElementById('direct-upload-input').click();
+  };
+
+  const handleDirectFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Please upload JPG, PNG, or PDF files only.');
+      return;
+    }
+
+    // Validate file size (10MB limit)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      toast.error('File too large. Maximum size is 10MB.');
+      return;
+    }
+
+    setIsScanning(true);
+
+    try {
+      const result = await expenseService.autoCreateFromScan(file);
+
+      // Check if expense was automatically created
+      if (result.expense_created) {
+        // Create category action message
+        const getCategoryMessage = () => {
+          if (!result.category_name) return null;
+
+          switch (result.category_action) {
+            case 'exact_match':
+              return `Category: ${result.category_name} (matched existing)`;
+            case 'partial_match':
+              return `Category: ${result.category_name} (similar match found)`;
+            case 'created':
+              return `Category: ${result.category_name} (newly created)`;
+            default:
+              return `Category: ${result.category_name}`;
+          }
+        };
+
+        toast.success(
+          <div>
+            <p className="font-semibold">Expense Created Successfully!</p>
+            <p className="text-sm">{result.description}</p>
+            <p className="text-sm">Vendor: {result.vendor}</p>
+            <p className="text-sm">Amount: ${result.amount}</p>
+            {result.category_name && (
+              <p className="text-sm text-blue-600">{getCategoryMessage()}</p>
+            )}
+            <p className="text-sm text-green-600">AI Confidence: {result.confidence}</p>
+          </div>,
+          { autoClose: 8000 }
+        );
+
+        // Refresh the data to show the new expense
+        await loadData();
+      } else {
+        // Fallback to modal if auto-creation failed
+        toast.warning('Auto-creation failed. Opening manual entry...');
+        setShowReceiptModal(true);
+      }
+    } catch (error) {
+      console.error('Direct upload error:', error);
+
+      // Check if it's a timeout error
+      if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+        toast.warning(
+          <div>
+            <p className="font-semibold">⏳ Processing in progress...</p>
+            <p className="text-sm">Your receipt is still being processed. Check your expenses in a moment!</p>
+            <p className="text-xs text-gray-500 mt-1">The expense may appear shortly even if this times out.</p>
+          </div>,
+          { autoClose: 8000 }
+        );
+        // Still refresh data in case it was created
+        setTimeout(() => loadData(), 5000);
+      } else {
+        toast.error(
+          error.response?.data?.error ||
+          'Failed to process receipt. Please try again.'
+        );
+      }
+    } finally {
+      setIsScanning(false);
+      // Clear the input
+      event.target.value = '';
+    }
+  };
+
+  const handleDirectScanFile = async (file) => {
+    if (!file) return;
+
+    // Open expense modal with scan functionality
+    setModalType('expense');
+    setSelectedExpense(null);
+    setExpenseForm({
+      description: '',
+      amount: '',
+      expense_date: new Date().toISOString().split('T')[0],
+      category: '',
+      tax_type: 'none',
+      tax_rate: '',
+      payment_method: 'cash',
+      reference_number: '',
+      vendor: '',
+      location: '',
+      client: '',
+      is_reimbursable: false,
+      is_tax_deductible: false,
+      receipt_file: file,
+      notes: '',
+    });
+    setShowModal(true);
+
+    // Start scanning automatically
+    setIsScanning(true);
+    try {
+      const scannedData = await expenseService.scanReceipt(file);
+
+      // Update form with scanned data
+      setExpenseForm(prev => ({
+        ...prev,
+        vendor: scannedData.vendor || prev.vendor,
+        amount: scannedData.amount || prev.amount,
+        expense_date: scannedData.expense_date || prev.expense_date,
+        description: scannedData.description || prev.description,
+        location: scannedData.location || prev.location,
+        tax_amount: scannedData.tax_amount || prev.tax_amount,
+        payment_method: scannedData.payment_method || prev.payment_method,
+        reference_number: scannedData.reference_number || prev.reference_number,
+        category: scannedData.category_id || prev.category,
+      }));
+
+      // Show confidence level to user
+      const confidenceColor = {
+        'High': 'text-green-600',
+        'Medium': 'text-yellow-600',
+        'Low': 'text-red-600'
+      }[scannedData.confidence] || 'text-gray-600';
+
+      toast.success(
+        <div>
+          <p>Receipt scanned successfully!</p>
+          <p className={`text-sm ${confidenceColor}`}>
+            Confidence: {scannedData.confidence}
+          </p>
+          <p className="text-xs text-gray-500 mt-1">
+            Please review the extracted data before saving.
+          </p>
+        </div>,
+        { autoClose: 5000 }
+      );
+
+    } catch (error) {
+      console.error('Receipt scanning error:', error);
+      toast.error(
+        error.response?.data?.error ||
+        'Failed to scan receipt. Please check the file and try again.'
+      );
+    } finally {
+      setIsScanning(false);
     }
   };
 
@@ -418,6 +1072,7 @@ const Expenses = () => {
       is_reimbursable: false,
       is_tax_deductible: false,
       receipt_file: null,
+      uploaded_file: null,
       notes: '',
     });
     setMileageForm({
@@ -435,14 +1090,14 @@ const Expenses = () => {
     setSelectedExpense(null);
   };
 
-  const openModal = (type, item = null) => {
+  const openModal = (type, item = null, scannedData = null) => {
     setModalType(type);
     setSelectedExpense(item);
-    
+
     // Force reload clients every time modal opens to ensure fresh data
     console.log('Force reloading clients for modal...');
     loadClients();
-    
+
     if (item) {
       if (type === 'expense') {
         setExpenseForm({
@@ -456,10 +1111,30 @@ const Expenses = () => {
           date: item.date || new Date().toISOString().split('T')[0],
         });
       }
+    } else if (scannedData) {
+      // Pre-fill form with scanned receipt data
+      if (type === 'expense') {
+        setExpenseForm({
+          vendor: scannedData.vendor || '',
+          amount: scannedData.amount || '',
+          expense_date: scannedData.expense_date || new Date().toISOString().split('T')[0],
+          description: scannedData.description || '',
+          location: scannedData.location || '',
+          tax_amount: scannedData.tax_amount || '0.00',
+          payment_method: scannedData.payment_method || 'other',
+          reference_number: scannedData.reference_number || '',
+          category: scannedData.category_id || '',
+          client: '',
+          is_reimbursable: false,
+          is_tax_deductible: true,
+          notes: `Auto-scanned receipt (Confidence: ${scannedData.confidence || 'Medium'})`,
+          receipt_file: null,
+        });
+      }
     } else {
       resetForm();
     }
-    
+
     setShowModal(true);
   };
 
@@ -774,6 +1449,122 @@ const Expenses = () => {
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             {modalType === 'expense' ? (
               <>
+                {/* AI Receipt Scan Section */}
+                <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-6 mb-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center">
+                      <div className="flex items-center justify-center w-10 h-10 bg-purple-100 dark:bg-purple-900/50 rounded-lg mr-3">
+                        <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-semibold text-purple-900 dark:text-purple-100">AI Receipt Scanner</h4>
+                        <p className="text-sm text-purple-700 dark:text-purple-300">
+                          Let AI extract expense details from your receipt automatically
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById('receipt-upload').click()}
+                      disabled={isScanning}
+                      className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transform transition-all duration-200 hover:scale-105 shadow-lg"
+                    >
+                      {isScanning ? (
+                        <>
+                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Scanning with AI...
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                          </svg>
+                          Scan with AI
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Hidden file input */}
+                  <input
+                    id="receipt-upload"
+                    type="file"
+                    accept="image/*,.pdf"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      console.log('Selected file:', file);
+                      setForm({ ...form, receipt_file: file });
+                      // Auto-scan when file is selected
+                      if (file) {
+                        setTimeout(() => {
+                          handleScanReceipt();
+                        }, 100);
+                      }
+                    }}
+                  />
+
+                  {form.receipt_file && (
+                    <div className="mt-4 p-3 bg-white dark:bg-gray-800 rounded-lg border border-purple-200 dark:border-purple-700">
+                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                        <DocumentArrowUpIcon className="h-4 w-4 mr-2 text-purple-600" />
+                        Uploaded: {form.receipt_file.name} ({(form.receipt_file.size / 1024 / 1024).toFixed(2)} MB)
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Additional File Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Additional File (Optional)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById('additional-file-upload').click()}
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    <DocumentArrowUpIcon className="h-4 w-4 mr-2" />
+                    Upload Additional File
+                  </button>
+
+                  {/* Hidden file input */}
+                  <input
+                    id="additional-file-upload"
+                    type="file"
+                    accept="*/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      setForm({ ...form, uploaded_file: file });
+                    }}
+                  />
+
+                  {form.uploaded_file && (
+                    <div className="mt-4 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                        <div className="flex items-center">
+                          <DocumentArrowUpIcon className="h-4 w-4 mr-2 text-gray-600" />
+                          Uploaded: {form.uploaded_file.name} ({(form.uploaded_file.size / 1024 / 1024).toFixed(2)} MB)
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setForm({ ...form, uploaded_file: null })}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -911,26 +1702,6 @@ const Expenses = () => {
                     </div>
                   )}
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Receipt
-                    </label>
-                    <input
-                      type="file"
-                      accept="image/*,.pdf,.doc,.docx,.txt"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        console.log('Selected file:', file);
-                        setForm({ ...form, receipt_file: file });
-                      }}
-                    />
-                    {form.receipt_file && (
-                      <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        Selected: {form.receipt_file.name} ({(form.receipt_file.size / 1024 / 1024).toFixed(2)} MB)
-                      </div>
-                    )}
-                  </div>
                 </div>
 
                 <div className="flex items-center space-x-4">
@@ -1137,6 +1908,26 @@ const Expenses = () => {
 
         <div className="flex space-x-3">
           <button
+            onClick={handleDirectAIScan}
+            disabled={isScanning}
+            className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transform transition-all duration-200 hover:scale-105 shadow-lg"
+          >
+            {isScanning ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Scanning...
+              </>
+            ) : (
+              <>
+                <DocumentArrowUpIcon className="h-4 w-4 mr-2" />
+                Upload Receipt
+              </>
+            )}
+          </button>
+          <button
             onClick={() => openModal('mileage')}
             className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
@@ -1152,6 +1943,15 @@ const Expenses = () => {
           </button>
         </div>
       </div>
+
+      {/* Hidden file input for direct upload */}
+      <input
+        type="file"
+        id="direct-upload-input"
+        accept="image/*,.pdf"
+        style={{ display: 'none' }}
+        onChange={handleDirectFileUpload}
+      />
 
       {/* Summary Cards */}
       {renderSummaryCards()}
@@ -1488,6 +2288,28 @@ const Expenses = () => {
                     </td>
                     <td className="px-6 py-4 text-sm font-medium">
                       <div className="flex space-x-2">
+                        {(expense.receipt_url || expense.uploaded_file_url) && (
+                          <div className="flex space-x-1">
+                            {expense.receipt_url && (
+                              <button
+                                onClick={() => window.open(expense.receipt_url, '_blank')}
+                                className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 p-1"
+                                title="View Receipt"
+                              >
+                                <EyeIcon className="h-4 w-4" />
+                              </button>
+                            )}
+                            {expense.uploaded_file_url && (
+                              <button
+                                onClick={() => window.open(expense.uploaded_file_url, '_blank')}
+                                className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-1"
+                                title="View Attachment"
+                              >
+                                <PaperClipIcon className="h-4 w-4" />
+                              </button>
+                            )}
+                          </div>
+                        )}
                         <button
                           onClick={() => openModal('expense', expense)}
                           className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300"
@@ -1837,6 +2659,39 @@ const Expenses = () => {
             </div>
           </motion.div>
         </div>
+      )}
+
+      {/* Hidden file input for direct AI scan */}
+      <input
+        id="direct-ai-scan-input"
+        type="file"
+        accept="image/*,.pdf"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files[0];
+          if (file) {
+            handleDirectScanFile(file);
+          }
+        }}
+      />
+
+      {/* Receipt Upload Modal */}
+      {showReceiptModal && (
+        <ReceiptUploadModal
+          onClose={() => {
+            setShowReceiptModal(false);
+            setScannedData(null);
+            setIsScanning(false);
+          }}
+          onReceiptScanned={(data) => {
+            setScannedData(data);
+            // Optionally auto-open expense modal with scanned data
+            openModal('expense', null, data);
+            setShowReceiptModal(false);
+          }}
+          scanning={isScanning}
+          setIsScanning={setIsScanning}
+        />
       )}
     </div>
   );

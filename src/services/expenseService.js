@@ -154,6 +154,45 @@ class ExpenseService {
     return response.data;
   }
 
+  async scanReceipt(receiptFile) {
+    const formData = new FormData();
+    formData.append('receipt_file', receiptFile);
+
+    const response = await api.post('/expenses/expenses/scan_receipt/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      timeout: 150000, // 2.5 minutes to match backend timeout + buffer
+    });
+    return response.data;
+  }
+
+  async extractText(receiptFile) {
+    const formData = new FormData();
+    formData.append('receipt_file', receiptFile);
+
+    const response = await api.post('/expenses/expenses/extract_text/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      timeout: 30000, // 30 seconds for text extraction only
+    });
+    return response.data;
+  }
+
+  async autoCreateFromScan(receiptFile) {
+    const formData = new FormData();
+    formData.append('receipt_file', receiptFile);
+
+    const response = await api.post('/expenses/expenses/scan_receipt/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      timeout: 150000, // 2.5 minutes to match backend timeout + buffer
+    });
+    return response.data;
+  }
+
   async getClientMileage(clientId) {
     const response = await api.get(`/expenses/mileage/client_mileage/?client_id=${clientId}`);
     return response.data;

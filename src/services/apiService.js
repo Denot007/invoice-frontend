@@ -188,17 +188,7 @@ class ApiService {
     }
   }
 
-  async exportInvoicePDF(id) {
-    try {
-      const response = await this.client.get(`/invoices/${id}/export_invoice_pdf/`, {
-        responseType: 'blob'
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Error exporting invoice PDF:', error);
-      throw error;
-    }
-  }
+  // Removed exportInvoicePDF - use documentService.downloadInvoicePDF instead for template system
 
   async exportMultipleInvoicesPDF(invoiceIds) {
     try {

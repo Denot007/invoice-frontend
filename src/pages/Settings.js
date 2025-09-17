@@ -7,9 +7,11 @@ import {
   CalendarIcon,
   SparklesIcon,
   ArrowPathIcon,
-  XMarkIcon
+  XMarkIcon,
+  PaintBrushIcon
 } from '@heroicons/react/24/outline';
 import billingService from '../services/billingService';
+import TemplateManager from '../components/templates/TemplateManager';
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('billing');
@@ -286,16 +288,69 @@ const Settings = () => {
         <nav className="-mb-px flex space-x-8">
           <button
             onClick={() => setActiveTab('billing')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+            className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center ${
               activeTab === 'billing'
                 ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
             }`}
           >
+            <CreditCardIcon className="h-4 w-4 mr-2" />
             Billing & Subscription
+          </button>
+          <button
+            onClick={() => setActiveTab('templates')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center ${
+              activeTab === 'templates'
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+            }`}
+          >
+            <PaintBrushIcon className="h-4 w-4 mr-2" />
+            Invoice Templates
+          </button>
+          <button
+            onClick={() => setActiveTab('estimate-templates')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center ${
+              activeTab === 'estimate-templates'
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+            }`}
+          >
+            <PaintBrushIcon className="h-4 w-4 mr-2" />
+            Estimate Templates
           </button>
         </nav>
       </div>
+
+      {/* Invoice Templates Tab Content */}
+      {activeTab === 'templates' && (
+        <div className="space-y-6">
+          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+              Invoice Templates
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+              Manage templates for invoices. Create, edit, and set default templates.
+            </p>
+          </div>
+          <TemplateManager isOpen={true} onClose={() => {}} inline={true} templateType="invoice" />
+        </div>
+      )}
+
+      {/* Estimate Templates Tab Content */}
+      {activeTab === 'estimate-templates' && (
+        <div className="space-y-6">
+          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+              Estimate Templates
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+              Manage templates for estimates. Create beautiful estimate layouts with watermarks and custom designs.
+            </p>
+          </div>
+          <TemplateManager isOpen={true} onClose={() => {}} inline={true} templateType="estimate" />
+        </div>
+      )}
 
       {/* Billing Tab Content */}
       {activeTab === 'billing' && (
@@ -531,6 +586,7 @@ const Settings = () => {
           </div>
         </div>
       )}
+
 
       {/* Subscription Required Modal */}
       {showSubscriptionModal && subscriptionError && (
