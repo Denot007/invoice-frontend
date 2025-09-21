@@ -31,6 +31,8 @@ import AboutUs from './pages/AboutUs';
 import CookiePolicy from './pages/CookiePolicy';
 import RefundPolicy from './pages/RefundPolicy';
 import FAQ from './pages/FAQ';
+import MarketplacePayment from './pages/MarketplacePayment';
+import Payments from './pages/Payments';
 
 const queryClient = new QueryClient();
 
@@ -106,6 +108,7 @@ function App() {
                 <Route path="/refund" element={<RefundPolicy />} />
                 <Route path="/faq" element={<FAQ />} />
                 <Route path="/pricing" element={<Navigate to="/register" />} />
+                <Route path="/admin/marketplace" element={<MarketplacePayment />} />
                 
                 {/* Protected Routes */}
                 <Route
@@ -222,6 +225,16 @@ function App() {
                     <ProtectedRoute>
                       <Layout>
                         <FileManager />
+                      </Layout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/payments"
+                  element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Payments />
                       </Layout>
                     </ProtectedRoute>
                   }
