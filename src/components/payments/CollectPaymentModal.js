@@ -265,11 +265,19 @@ const CollectPaymentModal = ({ isOpen, onClose, onPaymentSuccess }) => {
   const fetchUnpaidInvoices = async () => {
     setLoading(true);
     try {
-      const data = await invoiceService.getAll();
+      const data = await invoiceService.getInvoices();
+      console.log('Fetched invoice data:', data);
+
       // Filter unpaid or partially paid invoices
-      const unpaid = data.filter(inv =>
-        inv.status !== 'paid' && parseFloat(inv.balance_due || inv.total_amount) > 0
-      );
+      // Handle both camelCase and snake_case field names
+      const unpaid = data.filter(inv => {
+        const balanceDue = parseFloat(
+          inv.balanceDue || inv.balance_due || inv.totalAmount || inv.total_amount || 0
+        );
+        return inv.status !== 'paid' && balanceDue > 0;
+      });
+
+      console.log('Unpaid invoices:', unpaid);
       setInvoices(unpaid);
       setFilteredInvoices(unpaid);
     } catch (error) {
@@ -282,7 +290,8 @@ const CollectPaymentModal = ({ isOpen, onClose, onPaymentSuccess }) => {
 
   const handleInvoiceSelect = (invoice) => {
     setSelectedInvoice(invoice);
-    setPaymentAmount(invoice.balance_due || invoice.total_amount);
+    const balanceDue = invoice.balanceDue || invoice.balance_due || invoice.totalAmount || invoice.total_amount;
+    setPaymentAmount(balanceDue);
     setStep('payment');
   };
 
