@@ -64,6 +64,11 @@ const Header = ({ setSidebarOpen }) => {
               <Bars3Icon className="h-6 w-6" />
             </button>
 
+            {/* Beta Badge */}
+            <div className="ml-3 px-3 py-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full">
+              <span className="text-white text-xs font-semibold">BETA</span>
+            </div>
+
             {/* Search */}
             <div className="ml-4 lg:ml-0 flex-1 max-w-md">
               <div className="relative">

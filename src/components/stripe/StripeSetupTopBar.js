@@ -17,19 +17,29 @@ const StripeSetupTopBar = () => {
 
   const checkStripeStatus = async () => {
     try {
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:8000/api/marketplace/handymen/', {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await axios.get(`${apiUrl}/marketplace/handymen/`, {
+        headers: { Authorization: `Bearer ${token}` },
+        // Prevent caching
+        params: { _t: Date.now() }
       });
+
+      console.log('TopBar Stripe Status Check:', response.data);
 
       if (response.data.handymen && response.data.handymen.length > 0) {
         const handyman = response.data.handymen[0];
+        console.log('TopBar Handyman data:', handyman);
+        console.log('  - Has account:', !!handyman.stripe_account_id);
+        console.log('  - Onboarding complete:', handyman.onboarding_complete);
+
         setStripeStatus({
           hasAccount: !!handyman.stripe_account_id,
           onboardingComplete: handyman.onboarding_complete,
           handymanId: handyman.id
         });
       } else {
+        console.log('TopBar: No handyman records found');
         setStripeStatus({
           hasAccount: false,
           onboardingComplete: false,
@@ -37,7 +47,7 @@ const StripeSetupTopBar = () => {
         });
       }
     } catch (error) {
-      console.error('Failed to check Stripe status:', error);
+      console.error('TopBar: Failed to check Stripe status:', error);
       setStripeStatus({
         hasAccount: false,
         onboardingComplete: false,
@@ -53,8 +63,9 @@ const StripeSetupTopBar = () => {
 
     try {
       // Get user email from token
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
       const token = localStorage.getItem('token');
-      const userResponse = await axios.get('http://localhost:8000/api/accounts/profile/', {
+      const userResponse = await axios.get(`${apiUrl}/accounts/profile/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
