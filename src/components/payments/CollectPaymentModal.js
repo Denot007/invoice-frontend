@@ -27,22 +27,30 @@ const getStripeKey = () => {
 
 const stripePromise = loadStripe(getStripeKey());
 
-// CardElement styling
+// CardElement styling - Enhanced for better visibility
 const CARD_ELEMENT_OPTIONS = {
   style: {
     base: {
-      color: '#1f2937',
+      color: '#111827',
       fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       fontSmoothing: 'antialiased',
       fontSize: '16px',
+      fontWeight: '500',
+      lineHeight: '24px',
       '::placeholder': {
         color: '#9ca3af',
+        fontWeight: '400',
       },
+      iconColor: '#6366f1',
       backgroundColor: '#ffffff',
     },
     invalid: {
       color: '#ef4444',
       iconColor: '#ef4444',
+    },
+    complete: {
+      color: '#059669',
+      iconColor: '#059669',
     },
   },
   hidePostalCode: false,
@@ -174,9 +182,28 @@ const StripePaymentForm = ({ invoice, amount, onSuccess, onBack }) => {
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Card Details
         </label>
-        <div className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus-within:ring-2 focus-within:ring-blue-500">
-          <CardElement options={CARD_ELEMENT_OPTIONS} />
+        <div className="relative">
+          <div className="px-4 py-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+            <CardElement options={CARD_ELEMENT_OPTIONS} />
+          </div>
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center space-x-1">
+            <svg className="w-8 h-5" viewBox="0 0 32 20" fill="none">
+              <rect width="32" height="20" rx="3" fill="#1434CB"/>
+              <path d="M11.5 7.5h9v5h-9v-5z" fill="#EB001B"/>
+              <path d="M11.5 10a3.25 3.25 0 013.25-3.25 3.25 3.25 0 013.25 3.25 3.25 3.25 0 01-3.25 3.25A3.25 3.25 0 0111.5 10z" fill="#F79E1B"/>
+            </svg>
+            <svg className="w-8 h-5" viewBox="0 0 32 20" fill="none">
+              <rect width="32" height="20" rx="3" fill="#016FD0"/>
+              <path d="M20.5 7.5l-4 5 4 5v-10z" fill="#FFF"/>
+            </svg>
+          </div>
         </div>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 flex items-center">
+          <svg className="w-3.5 h-3.5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/>
+          </svg>
+          Your card information is secure and encrypted
+        </p>
       </div>
 
       {/* Error Message */}
@@ -323,17 +350,24 @@ const CollectPaymentModal = ({ isOpen, onClose, onPaymentSuccess }) => {
 
       console.log('Payment recorded:', result);
       toast.success('Payment recorded successfully!');
+
+      // Refresh invoice list to show updated status
+      await fetchUnpaidInvoices();
+
       handleClose();
-      if (onPaymentSuccess) onPaymentSuccess();
+      if (onPaymentSuccess) await onPaymentSuccess();
     } catch (error) {
       console.error('Payment error:', error);
       toast.error(error.response?.data?.error || 'Failed to record payment');
     }
   };
 
-  const handleStripePaymentSuccess = () => {
+  const handleStripePaymentSuccess = async () => {
+    // Refresh invoice list to show updated status
+    await fetchUnpaidInvoices();
+
     handleClose();
-    if (onPaymentSuccess) onPaymentSuccess();
+    if (onPaymentSuccess) await onPaymentSuccess();
   };
 
   const handleClose = () => {
