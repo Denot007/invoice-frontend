@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ExclamationTriangleIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 import { marketplaceService } from '../../services/marketplaceService';
 import { toast } from 'react-toastify';
 
 const StripeSetupTopBar = () => {
-  const navigate = useNavigate();
   const [stripeStatus, setStripeStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [setupLoading, setSetupLoading] = useState(false);
