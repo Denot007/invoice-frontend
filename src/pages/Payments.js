@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { marketplaceService } from '../services/marketplaceService';
+import CollectPaymentModal from '../components/payments/CollectPaymentModal';
 
 const Payments = () => {
   const { user } = useAuth();
@@ -8,6 +9,7 @@ const Payments = () => {
   const [loading, setLoading] = useState(true);
   const [setupLoading, setSetupLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [showCollectModal, setShowCollectModal] = useState(false);
 
   useEffect(() => {
     checkPaymentSetup();
@@ -118,11 +120,22 @@ const Payments = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Payment Setup</h1>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-          Enable payment processing to receive money for your services
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Payment Setup</h1>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            Enable payment processing to receive money for your services
+          </p>
+        </div>
+        <button
+          onClick={() => setShowCollectModal(true)}
+          className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Collect Payment</span>
+        </button>
       </div>
 
       {/* Payment Status Card */}
@@ -497,6 +510,16 @@ const Payments = () => {
           </div>
         </div>
       </div>
+
+      {/* Collect Payment Modal */}
+      <CollectPaymentModal
+        isOpen={showCollectModal}
+        onClose={() => setShowCollectModal(false)}
+        onPaymentSuccess={() => {
+          setShowCollectModal(false);
+          checkPaymentSetup(); // Refresh payment data
+        }}
+      />
     </div>
   );
 };
