@@ -21,6 +21,7 @@ import {
   Cell,
 } from 'recharts';
 import apiService from '../../services/apiService';
+import StripeSetupBanner from '../stripe/StripeSetupBanner';
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
@@ -135,6 +136,9 @@ const Dashboard = () => {
           </p>
         </motion.div>
       </div>
+
+      {/* Stripe Setup Banner */}
+      <StripeSetupBanner />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

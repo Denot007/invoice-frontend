@@ -36,12 +36,8 @@ export const marketplaceService = {
     return response.data;
   },
 
-  updateInvoiceStatus: async (invoiceId, paymentIntentId = null, amount = null) => {
-    const response = await api.post('/marketplace/update-invoice-status/', {
-      invoice_id: invoiceId,
-      payment_intent_id: paymentIntentId,
-      amount: amount  // Add amount to update payment totals
-    });
+  createExpressLoginLink: async (handymanId) => {
+    const response = await api.post('/marketplace/express-login/', { handyman_id: handymanId });
     return response.data;
   }
 };

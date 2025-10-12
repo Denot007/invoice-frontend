@@ -1,6 +1,7 @@
-import  { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import Footer from '../layout/Footer';
 import {
   ChartBarIcon,
@@ -21,7 +22,31 @@ import {
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const [ setIsVideoPlaying] = useState(false);
+  const [setIsVideoPlaying] = useState(false);
+  const [pricing, setPricing] = useState({
+    weekly: 5.99,
+    monthly: 22.99,
+    yearly: 199.99,
+    trial_days: 14,
+    has_active_promotion: false,
+    promotion: null
+  });
+
+  // Fetch dynamic pricing on component mount
+  useEffect(() => {
+    const fetchPricing = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/api/marketplace/pricing/public/');
+        if (response.data.success) {
+          setPricing(response.data.pricing);
+        }
+      } catch (error) {
+        console.error('Failed to fetch pricing:', error);
+        // Keep default pricing if fetch fails
+      }
+    };
+    fetchPricing();
+  }, []);
 
   const fadeInUp = {
     initial: { opacity: 0, y: 60 },
@@ -447,8 +472,15 @@ const LandingPage = () => {
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-2">Weekly Plan</h3>
                 <div className="mb-6">
-                  <span className="text-4xl font-bold text-white">$5.99</span>
+                  <span className="text-4xl font-bold text-white">${pricing.weekly}</span>
                   <span className="text-gray-400">/week</span>
+                  {pricing.has_active_promotion && (
+                    <div className="mt-2">
+                      <span className="inline-block bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                        {pricing.promotion.discount_percentage}% OFF
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <p className="text-gray-300 mb-6">Perfect for short-term projects and testing</p>
                 
@@ -481,7 +513,7 @@ const LandingPage = () => {
                   onClick={() => navigate('/register')}
                   className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all"
                 >
-                  Start 14-Day Trial
+                  Start {pricing.trial_days}-Day Trial
                 </motion.button>
               </div>
             </motion.div>
@@ -507,8 +539,15 @@ const LandingPage = () => {
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-2">Monthly Plan</h3>
                 <div className="mb-6">
-                  <span className="text-4xl font-bold text-white">$22.99</span>
+                  <span className="text-4xl font-bold text-white">${pricing.monthly}</span>
                   <span className="text-gray-400">/month</span>
+                  {pricing.has_active_promotion && (
+                    <div className="mt-2">
+                      <span className="inline-block bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                        {pricing.promotion.discount_percentage}% OFF
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <p className="text-gray-300 mb-6">Ideal for growing businesses and freelancers</p>
                 
@@ -541,7 +580,7 @@ const LandingPage = () => {
                   onClick={() => navigate('/register')}
                   className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all"
                 >
-                  Start 14-Day Trial
+                  Start {pricing.trial_days}-Day Trial
                 </motion.button>
               </div>
             </motion.div>
@@ -567,11 +606,18 @@ const LandingPage = () => {
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-2">Yearly Plan</h3>
                 <div className="mb-2">
-                  <span className="text-4xl font-bold text-white">$199.99</span>
+                  <span className="text-4xl font-bold text-white">${pricing.yearly}</span>
                   <span className="text-gray-400">/year</span>
+                  {pricing.has_active_promotion && (
+                    <div className="mt-2">
+                      <span className="inline-block bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                        {pricing.promotion.discount_percentage}% OFF
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="text-green-400 text-sm font-semibold mb-6">
-                  (~$16.67/month)
+                  (~${(pricing.yearly / 12).toFixed(2)}/month)
                 </div>
                 <p className="text-gray-300 mb-6">Best value for established businesses</p>
                 
@@ -604,7 +650,7 @@ const LandingPage = () => {
                   onClick={() => navigate('/register')}
                   className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all"
                 >
-                  Start 14-Day Trial
+                  Start {pricing.trial_days}-Day Trial
                 </motion.button>
               </div>
             </motion.div>

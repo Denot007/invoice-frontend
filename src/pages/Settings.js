@@ -403,7 +403,7 @@ const Settings = () => {
                             Trial Expired
                           </p>
                           <p className="text-sm text-red-700 dark:text-red-300">
-                            Your free trial has ended. Please choose a plan to continue using InvoiciFy.
+                            Your free trial has ended. Please choose a plan to continue using InvoiceGear.
                           </p>
                         </div>
                       </div>
@@ -475,24 +475,26 @@ const Settings = () => {
                         Restore Subscription
                       </button>
                     )}
-                    <button
-                      onClick={handleSyncSubscription}
-                      className="btn-secondary flex items-center"
-                      title="Sync subscription status from Stripe"
-                    >
-                      <ArrowPathIcon className="h-4 w-4 mr-2" />
-                      Sync Status
-                    </button>
-                    {/* Development Test Button */}
+                    {/* Development Test Buttons */}
                     {process.env.NODE_ENV === 'development' && (
-                      <button
-                        onClick={handleExpireTrial}
-                        className="btn-secondary flex items-center text-red-600 border-red-300 hover:bg-red-50"
-                        title="Test subscription blocking (Development only)"
-                      >
-                        <ExclamationTriangleIcon className="h-4 w-4 mr-2" />
-                        Test Expire Trial
-                      </button>
+                      <>
+                        <button
+                          onClick={handleSyncSubscription}
+                          className="btn-secondary flex items-center"
+                          title="Sync subscription status from Stripe"
+                        >
+                          <ArrowPathIcon className="h-4 w-4 mr-2" />
+                          Sync Status
+                        </button>
+                        <button
+                          onClick={handleExpireTrial}
+                          className="btn-secondary flex items-center text-red-600 border-red-300 hover:bg-red-50"
+                          title="Test subscription blocking (Development only)"
+                        >
+                          <ExclamationTriangleIcon className="h-4 w-4 mr-2" />
+                          Test Expire Trial
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>

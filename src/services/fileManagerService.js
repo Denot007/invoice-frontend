@@ -56,9 +56,26 @@ const fileManagerService = {
     });
   },
 
-  downloadFile: (id) => api.get(`/filemanager/files/${id}/download/`, {
-    responseType: 'blob'
-  }),
+  downloadFile: async (id) => {
+    try {
+      // Get the download URL from backend
+      const response = await api.get(`/filemanager/files/${id}/download/`);
+
+      // Backend returns { url, filename } for S3 files
+      if (response.data.url) {
+        // Simply open the public S3 URL in a new tab
+        // The browser will either display it or download it depending on the file type
+        window.open(response.data.url, '_blank');
+        return { success: true };
+      } else {
+        // For local files, the response is already the blob
+        return response;
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      throw error;
+    }
+  },
 
   deleteFile: (id) => api.delete(`/filemanager/files/${id}/`),
 

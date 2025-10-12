@@ -99,15 +99,7 @@ const StripeCardPayment = ({ amount, invoice, onPaymentSuccess, onCancel }) => {
       if (error) {
         toast.error(error.message || 'Payment failed');
       } else if (confirmedPayment.status === 'succeeded') {
-        // Manually update invoice status since webhooks don't work on localhost
-        try {
-          await marketplaceService.updateInvoiceStatus(invoice.id, confirmedPayment.id, amount);
-          console.log('Invoice status updated to paid, amount:', amount);
-        } catch (updateError) {
-          console.error('Failed to update invoice status:', updateError);
-          // Continue anyway - payment was successful
-        }
-
+        // Webhook will automatically update invoice status
         toast.success('Payment processed successfully!');
         onPaymentSuccess({
           amount: amount,

@@ -15,6 +15,7 @@ import {
 import { FolderIcon as FolderSolidIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
 import fileManagerService from '../services/fileManagerService';
+import StorageStats from '../components/storage/StorageStats';
 
 const FileManager = () => {
   const [currentFolder, setCurrentFolder] = useState(null);
@@ -29,6 +30,8 @@ const FileManager = () => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
   const [thumbnailErrors, setThumbnailErrors] = useState(new Set());
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState(null);
 
   useEffect(() => {
     loadFolderContents();
@@ -185,23 +188,28 @@ const FileManager = () => {
 
   const handleDownloadFile = async (file) => {
     try {
-      const response = await fileManagerService.downloadFile(file.id);
-      fileManagerService.downloadFileFromBlob(response.data, file.original_name);
-      toast.success('File downloaded successfully');
+      // Download file - service will open S3 URL in new tab
+      await fileManagerService.downloadFile(file.id);
+      toast.success('Opening file in new tab');
     } catch (error) {
       console.error('Error downloading file:', error);
       toast.error('Failed to download file');
     }
   };
 
-  const handleDeleteFile = async (file) => {
-    if (!window.confirm(`Are you sure you want to delete "${file.original_name}"?`)) {
-      return;
-    }
+  const handleDeleteFile = (file) => {
+    setFileToDelete(file);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteFile = async () => {
+    if (!fileToDelete) return;
 
     try {
-      await fileManagerService.deleteFile(file.id);
+      await fileManagerService.deleteFile(fileToDelete.id);
       toast.success('File deleted successfully');
+      setShowDeleteModal(false);
+      setFileToDelete(null);
       loadFolderContents();
     } catch (error) {
       console.error('Error deleting file:', error);
@@ -283,6 +291,11 @@ const FileManager = () => {
           <p className="mt-2 text-gray-600 dark:text-gray-400">
             Organize and manage your files and folders
           </p>
+        </div>
+
+        {/* Storage Statistics */}
+        <div className="mb-8">
+          <StorageStats />
         </div>
 
         {/* Toolbar */}
@@ -676,6 +689,46 @@ const FileManager = () => {
                   className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                 >
                   Create
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && fileToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4"
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 dark:bg-red-900/30 rounded-full">
+                <TrashIcon className="h-6 w-6 text-red-600 dark:text-red-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white text-center mb-2">
+                Delete File?
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
+                Are you sure you want to delete "{fileToDelete.original_name}"? This action cannot be undone and the file will be permanently removed from storage.
+              </p>
+              <div className="mt-6 flex justify-end space-x-3">
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setFileToDelete(null);
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDeleteFile}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                >
+                  Delete
                 </button>
               </div>
             </div>

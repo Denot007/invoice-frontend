@@ -8,6 +8,7 @@ import { Toaster } from 'react-hot-toast';
 import 'react-toastify/dist/ReactToastify.css';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
+import StripeSetupTopBar from './components/stripe/StripeSetupTopBar';
 import LandingPage from './components/landing/LandingPage';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
@@ -33,6 +34,12 @@ import RefundPolicy from './pages/RefundPolicy';
 import FAQ from './pages/FAQ';
 import MarketplacePayment from './pages/MarketplacePayment';
 import Payments from './pages/Payments';
+import PaymentSetupComplete from './pages/PaymentSetupComplete';
+import PaymentSetupRefresh from './pages/PaymentSetupRefresh';
+import PublicInvoice from './components/public/PublicInvoice';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminLogin from './pages/AdminLogin';
+import AdminLayout from './components/layout/AdminLayout';
 
 const queryClient = new QueryClient();
 
@@ -50,16 +57,53 @@ const ProtectedRoute = ({ children }) => {
   return user ? children : <Navigate to="/" />;
 };
 
+const AdminRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  // If no user, redirect to admin login
+  if (!user) {
+    return <Navigate to="/admin/login" />;
+  }
+
+  // If user is logged in but not admin, show access denied
+  if (!user.is_staff && !user.is_superuser) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-white mb-4">Access Denied</h1>
+          <p className="text-gray-400 mb-6">You don't have permission to access this page.</p>
+          <a href="/dashboard" className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+            Go to Dashboard
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  return children;
+};
+
 const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
-      
+
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <Header setSidebarOpen={setSidebarOpen} />
+
+        {/* Persistent Stripe Setup Top Bar */}
+        <StripeSetupTopBar />
 
         {/* Main content */}
         <main className="flex-1 overflow-auto p-6">
@@ -98,7 +142,14 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/signup" element={<Navigate to="/register" />} />
                 <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
-                
+
+                {/* Public Invoice View */}
+                <Route path="/public/invoice/:token" element={<PublicInvoice />} />
+
+                {/* Payment Setup Callbacks */}
+                <Route path="/payments/setup-complete" element={<PaymentSetupComplete />} />
+                <Route path="/payments/setup-refresh" element={<PaymentSetupRefresh />} />
+
                 {/* Legal Pages */}
                 <Route path="/privacy" element={<PrivacyPolicy />} />
                 <Route path="/terms" element={<TermsOfService />} />
@@ -238,6 +289,22 @@ function App() {
                       </Layout>
                     </ProtectedRoute>
                   }
+                />
+                {/* Admin Routes */}
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route
+                  path="/admin/dashboard"
+                  element={
+                    <AdminRoute>
+                      <AdminLayout>
+                        <AdminDashboard />
+                      </AdminLayout>
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin"
+                  element={<Navigate to="/admin/dashboard" />}
                 />
               </Routes>
             </div>

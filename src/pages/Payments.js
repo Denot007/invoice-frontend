@@ -63,6 +63,46 @@ const Payments = () => {
     setSetupLoading(false);
   };
 
+  const resendSetupEmail = async () => {
+    setSetupLoading(true);
+    setMessage('');
+
+    try {
+      // Re-trigger the account creation which will resend the email
+      const result = await marketplaceService.createHandymanAccount(user.email);
+      setMessage({
+        type: 'success',
+        text: `Setup email resent! Check your inbox at ${user.email}`
+      });
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text: error.message || 'Failed to resend setup email'
+      });
+    }
+    setSetupLoading(false);
+  };
+
+  const openStripeDashboard = async () => {
+    if (!paymentSetup?.handyman_id) {
+      setMessage({
+        type: 'error',
+        text: 'No payment account found'
+      });
+      return;
+    }
+
+    try {
+      const result = await marketplaceService.createExpressLoginLink(paymentSetup.handyman_id);
+      window.open(result.url, '_blank');
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text: 'Unable to open Stripe dashboard. Please try again.'
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -72,7 +112,8 @@ const Payments = () => {
   }
 
   // Show setup instructions after account is created but before onboarding is complete
-  const showSetupInstructions = paymentSetup && !paymentSetup.onboarding_complete;
+  // Only show if stripe_account_id exists (account was actually created)
+  const showSetupInstructions = paymentSetup && paymentSetup.stripe_account_id && !paymentSetup.onboarding_complete;
 
   return (
     <div className="space-y-6">
@@ -87,8 +128,8 @@ const Payments = () => {
       {/* Payment Status Card */}
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
         <div className="px-6 py-5">
-          {!paymentSetup ? (
-            // Step 1: Initial activation button
+          {!paymentSetup || !paymentSetup.stripe_account_id ? (
+            // Step 1: Initial activation button (show if no handyman record OR no stripe_account_id)
             <div className="text-center py-12">
               <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-6">
                 <svg className="w-10 h-10 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,7 +142,7 @@ const Payments = () => {
               </h3>
 
               <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-lg mx-auto text-lg">
-                Activate payment processing to earn $294 for every $300 service with direct bank transfers.
+                Activate your account to accept credit card payments from clients directly. It only takes a couple minutes to set up!
               </p>
 
               <button
@@ -179,7 +220,18 @@ const Payments = () => {
                 </ol>
               </div>
 
-              <div className="flex justify-center space-x-4">
+              <div className="flex justify-center space-x-3">
+                <button
+                  onClick={resendSetupEmail}
+                  disabled={setupLoading}
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  {setupLoading ? 'Sending...' : 'Resend Email'}
+                </button>
+
                 <button
                   onClick={refreshStatus}
                   disabled={loading}
@@ -192,7 +244,7 @@ const Payments = () => {
                 </button>
 
                 <button
-                  onClick={() => window.open('https://dashboard.stripe.com/express/accounts', '_blank')}
+                  onClick={openStripeDashboard}
                   className="inline-flex items-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
                 >
                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -230,7 +282,7 @@ const Payments = () => {
 
                 <div className="flex space-x-2">
                   <button
-                    onClick={() => window.open('https://dashboard.stripe.com/express/accounts', '_blank')}
+                    onClick={openStripeDashboard}
                     className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                   >
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -372,7 +424,7 @@ const Payments = () => {
                       <strong>Account ID:</strong> {paymentSetup.handyman_id || paymentSetup.stripe_account_id}
                     </p>
                     <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                      You earn $294 for every $300 service payment
+                      <strong>Onboarding Status:</strong> {paymentSetup.onboarding_complete ? 'Complete' : 'Incomplete'}
                     </p>
                   </div>
                 </div>

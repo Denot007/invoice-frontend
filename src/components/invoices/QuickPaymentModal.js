@@ -86,13 +86,7 @@ const StripeCardForm = ({ amount, invoice, onSuccess, onBack, isSubmitting, setI
         setError(stripeError.message || 'Payment failed');
         setIsSubmitting(false);
       } else if (confirmedPayment.status === 'succeeded') {
-        // Update invoice status manually for localhost
-        try {
-          await marketplaceService.updateInvoiceStatus(invoice.id, confirmedPayment.id, amount);
-        } catch (updateError) {
-          console.error('Failed to update invoice status:', updateError);
-        }
-
+        // Webhook will automatically update invoice status
         toast.success('Payment processed successfully!');
         onSuccess({
           amount: amount,

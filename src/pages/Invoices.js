@@ -19,6 +19,7 @@ import PaymentModal from '../components/invoices/PaymentModal';
 import QuickPaymentModal from '../components/invoices/QuickPaymentModal';
 import InvoiceActionsModal from '../components/invoices/InvoiceActionsModal';
 import DeleteConfirmModal from '../components/common/DeleteConfirmModal';
+import StripeSetupBanner from '../components/stripe/StripeSetupBanner';
 import invoiceService from '../services/invoiceService';
 import documentService from '../services/documentService';
 import { useAuth } from '../context/AuthContext';
@@ -427,6 +428,9 @@ const Invoices = () => {
           New Invoice
         </motion.button>
       </div>
+
+      {/* Stripe Setup Banner (Compact) */}
+      <StripeSetupBanner compact />
 
       {/* Filters and Search */}
       <div className="card p-4">
