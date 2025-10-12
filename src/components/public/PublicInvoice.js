@@ -4,7 +4,7 @@ import axios from 'axios';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
 // Initialize Stripe
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || 'pk_test_51RaJzwPwZVx974bpnQjLrYMHtjZkO3RNcr2ztUYgWPmDYa7QOQJ4CtEPLY5cZQwwUZSQp5l0Fk7I3JiGArvPvvRB00SJfLwcY5');
