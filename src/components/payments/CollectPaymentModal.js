@@ -313,19 +313,21 @@ const CollectPaymentModal = ({ isOpen, onClose, onPaymentSuccess }) => {
     }
 
     try {
-      await invoiceService.addPayment(selectedInvoice.id, {
+      // Use recordPayment method (correct method name)
+      const result = await invoiceService.recordPayment(selectedInvoice.id, {
         amount: paymentAmount,
         payment_method: traditionalPayment.method,
         reference_number: traditionalPayment.reference,
         notes: traditionalPayment.notes,
       });
 
+      console.log('Payment recorded:', result);
       toast.success('Payment recorded successfully!');
       handleClose();
       if (onPaymentSuccess) onPaymentSuccess();
     } catch (error) {
       console.error('Payment error:', error);
-      toast.error('Failed to record payment');
+      toast.error(error.response?.data?.error || 'Failed to record payment');
     }
   };
 
