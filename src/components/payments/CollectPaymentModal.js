@@ -265,12 +265,16 @@ const CollectPaymentModal = ({ isOpen, onClose, onPaymentSuccess }) => {
   const fetchUnpaidInvoices = async () => {
     setLoading(true);
     try {
-      const data = await invoiceService.getInvoices();
-      console.log('Fetched invoice data:', data);
+      const result = await invoiceService.getInvoices();
+      console.log('Fetched invoice result:', result);
+
+      // Extract the actual invoice data array (same as Invoices.js line 64)
+      const invoiceData = result.data || result || [];
+      console.log('Invoice data array:', invoiceData);
 
       // Filter unpaid or partially paid invoices
       // Handle both camelCase and snake_case field names
-      const unpaid = data.filter(inv => {
+      const unpaid = invoiceData.filter(inv => {
         const balanceDue = parseFloat(
           inv.balanceDue || inv.balance_due || inv.totalAmount || inv.total_amount || 0
         );
