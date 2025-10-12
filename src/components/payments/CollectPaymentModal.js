@@ -351,10 +351,16 @@ const CollectPaymentModal = ({ isOpen, onClose, onPaymentSuccess }) => {
       console.log('Payment recorded:', result);
       toast.success('Payment recorded successfully!');
 
+      // Close modal first
+      handleClose();
+
+      // Small delay to ensure database transaction completes
+      await new Promise(resolve => setTimeout(resolve, 300));
+
       // Refresh invoice list to show updated status
       await fetchUnpaidInvoices();
 
-      handleClose();
+      // Notify parent to refresh
       if (onPaymentSuccess) await onPaymentSuccess();
     } catch (error) {
       console.error('Payment error:', error);
@@ -363,10 +369,16 @@ const CollectPaymentModal = ({ isOpen, onClose, onPaymentSuccess }) => {
   };
 
   const handleStripePaymentSuccess = async () => {
+    // Close modal first
+    handleClose();
+
+    // Small delay to ensure database transaction completes
+    await new Promise(resolve => setTimeout(resolve, 300));
+
     // Refresh invoice list to show updated status
     await fetchUnpaidInvoices();
 
-    handleClose();
+    // Notify parent to refresh
     if (onPaymentSuccess) await onPaymentSuccess();
   };
 
