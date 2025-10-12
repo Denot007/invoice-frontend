@@ -19,7 +19,8 @@ const StripeSetupBanner = ({ compact = false }) => {
   const checkStripeStatus = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:8000/api/marketplace/handymen/', {
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+      const response = await axios.get(`${apiUrl}/marketplace/handymen/`, {
         headers: { Authorization: `Bearer ${token}` },
         // Prevent caching
         params: { _t: Date.now() }
@@ -63,8 +64,9 @@ const StripeSetupBanner = ({ compact = false }) => {
 
     try {
       // Get user email from token
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
       const token = localStorage.getItem('token');
-      const userResponse = await axios.get('http://localhost:8000/api/accounts/profile/', {
+      const userResponse = await axios.get(`${apiUrl}/accounts/profile/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
