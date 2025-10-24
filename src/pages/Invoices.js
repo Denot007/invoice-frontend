@@ -274,6 +274,12 @@ const Invoices = () => {
 
   const handleDuplicate = async (invoice) => {
     try {
+      // Check usage limits first
+      if (usageLimits && !usageLimits.can_add_more) {
+        setIsUpgradeModalOpen(true);
+        return;
+      }
+
       // Map items to the correct format for the backend
       const mappedItems = (invoice.items || []).map(item => ({
         description: item.description,
@@ -293,23 +299,39 @@ const Invoices = () => {
         tax_rate: parseFloat(invoice.tax_rate || invoice.tax || 0),
         status: 'draft',
       };
-      
+
+      console.log('🔄 Duplicating invoice with data:', newInvoiceData);
       const result = await invoiceService.createInvoice(newInvoiceData);
+      console.log('📊 Duplicate result:', result);
+
       if (result.success) {
         const duplicatedInvoice = result.data;
         await fetchInvoices();
         await fetchUsageLimits(); // Refresh usage counter
+        toast.success('Invoice duplicated successfully!');
 
         // Show template selection modal for the duplicated invoice
         setNewlyCreatedInvoice(duplicatedInvoice);
         setIsDuplicatedInvoice(true);
         setIsTemplateSelectionModalOpen(true);
       } else {
-        throw new Error(result.error || 'Failed to duplicate invoice');
+        // Check if it's a subscription limit error
+        if (result.error && result.error.includes('limit')) {
+          setIsUpgradeModalOpen(true);
+        } else {
+          throw new Error(result.error || 'Failed to duplicate invoice');
+        }
       }
     } catch (error) {
-      console.error('Error duplicating invoice:', error);
-      toast.error('Failed to duplicate invoice. Please try again.');
+      console.error('❌ Error duplicating invoice:', error);
+      console.error('Error details:', error.response?.data || error.message);
+
+      // Check if it's a 403 subscription error
+      if (error.response?.status === 403) {
+        setIsUpgradeModalOpen(true);
+      } else {
+        toast.error(error.response?.data?.error || error.message || 'Failed to duplicate invoice. Please try again.');
+      }
     }
   };
 
