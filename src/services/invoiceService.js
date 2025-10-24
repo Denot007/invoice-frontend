@@ -362,10 +362,10 @@ class InvoiceService {
     };
   }
 
-  async sendInvoice(id) {
+  async sendInvoice(id, data = {}) {
     if (this.useAPI) {
       try {
-        const result = await apiService.sendInvoice(id);
+        const result = await apiService.sendInvoice(id, data);
         return {
           success: result.success !== false,
           message: result.message || 'Invoice sent successfully',
@@ -381,7 +381,7 @@ class InvoiceService {
         };
       }
     }
-    
+
     return {
       success: false,
       error: 'API service not available',
@@ -620,6 +620,11 @@ class InvoiceService {
       error: 'API service not available',
       message: 'Cannot export PDF - API service not available',
     };
+  }
+
+  async getUsageLimits() {
+    const result = await apiService.getInvoiceUsageLimits();
+    return result;
   }
 
 }

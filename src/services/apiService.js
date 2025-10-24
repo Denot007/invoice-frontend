@@ -126,9 +126,9 @@ class ApiService {
     }
   }
 
-  async sendInvoice(id) {
+  async sendInvoice(id, data = {}) {
     try {
-      const response = await this.client.post(`/invoices/${id}/send_invoice/`);
+      const response = await this.client.post(`/invoices/${id}/send_invoice/`, data);
       return response.data;
     } catch (error) {
       console.error('Error sending invoice:', error);
@@ -261,6 +261,26 @@ class ApiService {
       return response.data;
     } catch (error) {
       console.error('Error fetching client stats:', error);
+      throw error;
+    }
+  }
+
+  async getClientUsageLimits() {
+    try {
+      const response = await this.client.get('/clients/usage_limits/');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching client usage limits:', error);
+      throw error;
+    }
+  }
+
+  async getInvoiceUsageLimits() {
+    try {
+      const response = await this.client.get('/invoices/usage_limits/');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching invoice usage limits:', error);
       throw error;
     }
   }

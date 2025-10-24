@@ -174,7 +174,7 @@ const PrivacyPolicy = () => {
             </p>
             <div className={`mt-4 p-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'} rounded-md`}>
               <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                Email: privacy@invoicify.com<br />
+                Email: app@invoicegear.com<br />
                 Address: [Your Business Address]<br />
                 Phone: [Your Phone Number]
               </p>

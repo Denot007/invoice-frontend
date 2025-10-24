@@ -180,7 +180,7 @@ const ResetPassword = () => {
               <DocumentDuplicateIcon className="w-8 h-8 text-white" />
             </motion.div>
             <h1 className="text-3xl font-bold text-white mb-2">
-              InvoiciFy
+              InvoiceGear
             </h1>
             <h2 className="text-xl font-bold text-white mb-2">Reset Your Password</h2>
             <p className="text-gray-300">

@@ -52,7 +52,7 @@ const ContactUs = () => {
     {
       icon: EnvelopeIcon,
       title: 'Email',
-      value: 'support@invoicify.com',
+      value: 'support@invoicegear.com',
       description: 'Send us an email anytime'
     },
     {

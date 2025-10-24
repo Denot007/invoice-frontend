@@ -1,22 +1,85 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import EmailVerification from './EmailVerification';
-import { 
-  EyeIcon, 
-  EyeSlashIcon, 
-  SunIcon, 
-  MoonIcon, 
-  UserIcon, 
-  EnvelopeIcon, 
-  BuildingOfficeIcon, 
+import {
+  EyeIcon,
+  EyeSlashIcon,
+  SunIcon,
+  MoonIcon,
+  UserIcon,
+  EnvelopeIcon,
+  BuildingOfficeIcon,
   PhoneIcon,
   MapPinIcon,
   GlobeAltIcon,
- 
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  SparklesIcon,
+  CheckCircleIcon,
 } from '@heroicons/react/24/outline';
+
+// Professional service provider images from Unsplash (free to use)
+const sliderImages = [
+  {
+    url: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=800&q=80',
+    title: 'Electricians',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=800&q=80',
+    title: 'Plumbers',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1664382953518-d1111a23ce47?w=800&q=80',
+    title: 'HVAC Technicians',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1558904541-efa843a96f01?w=800&q=80',
+    title: 'Lawn Care & Landscaping',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&q=80',
+    title: 'Construction Workers',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=80',
+    title: 'Software Developers',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80',
+    title: 'Web Designers',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=800&q=80',
+    title: 'Architects',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&q=80',
+    title: 'General Contractors',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80',
+    title: 'Business Consultants',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=800&q=80',
+    title: 'Marketing Agencies',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80',
+    title: 'Graphic Designers',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1531973576160-7125cd663d86?w=800&q=80',
+    title: 'Photographers',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?w=800&q=80',
+    title: 'Freelancers',
+  },
+];
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -38,10 +101,27 @@ const Register = () => {
   const [step, setStep] = useState(1);
   const [showEmailVerification, setShowEmailVerification] = useState(false);
   const [userEmail, setUserEmail] = useState('');
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   const { register } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+
+  // Auto-advance slider every 4 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % sliderImages.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % sliderImages.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + sliderImages.length) % sliderImages.length);
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -118,8 +198,8 @@ const Register = () => {
 
   const handleVerificationSuccess = () => {
     setShowEmailVerification(false);
-    navigate('/login', { 
-      state: { 
+    navigate('/login', {
+      state: {
         message: 'Email verified successfully! You can now log in.',
         email: userEmail
       }
@@ -144,27 +224,167 @@ const Register = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
-      <div className="absolute top-4 right-4">
-        <button
-          onClick={toggleTheme}
-          className="p-2 rounded-lg bg-white dark:bg-gray-800 shadow-md hover:shadow-lg transition-all duration-200"
-        >
-          {theme === 'light' ? (
-            <MoonIcon className="h-5 w-5 text-gray-600" />
-          ) : (
-            <SunIcon className="h-5 w-5 text-yellow-400" />
-          )}
-        </button>
+    <div className="min-h-screen bg-white dark:bg-gray-900 flex overflow-hidden">
+      {/* Left Side - Image Slider */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 dark:from-primary-800 dark:via-primary-900 dark:to-gray-900 overflow-hidden">
+        {/* Animated background pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }} />
+        </div>
+
+        {/* Floating particles effect */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute w-96 h-96 bg-white/5 rounded-full blur-3xl -top-48 -left-48 animate-pulse"></div>
+          <div className="absolute w-96 h-96 bg-primary-400/10 rounded-full blur-3xl -bottom-48 -right-48 animate-pulse delay-1000"></div>
+        </div>
+
+        {/* Image Slider */}
+        <div className="relative w-full h-full flex flex-col items-center justify-center p-12 z-10">
+          {/* Big Headline */}
+          <motion.div
+            initial={{ opacity: 0, y: -30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-5xl md:text-6xl font-extrabold text-white leading-tight mb-4">
+              Who's Currently Using<br />
+              <span className="bg-gradient-to-r from-yellow-300 via-yellow-200 to-yellow-300 bg-clip-text text-transparent">
+                InvoiceGear
+              </span>
+            </h2>
+            <p className="text-xl text-white/90 font-light tracking-wide">
+              To Gear Up Their Business ?
+            </p>
+          </motion.div>
+
+          <div className="relative w-full max-w-2xl">
+            {/* Slider Images */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentSlide}
+                initial={{ opacity: 0, scale: 0.92, y: 30 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.92, y: -30 }}
+                transition={{ duration: 0.7, ease: "easeOut" }}
+                className="relative"
+              >
+                {/* Glow effect behind card */}
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 blur-3xl rounded-3xl transform scale-105"></div>
+
+                <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white/30 backdrop-blur-sm hover:border-white/50 transition-all duration-300">
+                  <img
+                    src={sliderImages[currentSlide].url}
+                    alt={sliderImages[currentSlide].title}
+                    className="w-full h-[450px] object-cover transform hover:scale-105 transition-transform duration-700"
+                  />
+                  {/* Enhanced gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+
+                  {/* Shine effect on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+
+                  {/* Content overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                    >
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+                          <SparklesIcon className="w-6 h-6 text-white" />
+                        </div>
+                        <span className="text-sm font-bold text-yellow-300 uppercase tracking-widest">
+                          Trusted Professionals
+                        </span>
+                      </div>
+                      <h3 className="text-5xl font-black mb-2 bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent">
+                        {sliderImages[currentSlide].title}
+                      </h3>
+                      <div className="w-20 h-1 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full"></div>
+                    </motion.div>
+                  </div>
+                </div>
+
+                {/* Navigation Arrows */}
+                <button
+                  onClick={prevSlide}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-lg flex items-center justify-center hover:bg-white hover:scale-110 transition-all duration-200 group"
+                >
+                  <ChevronLeftIcon className="w-6 h-6 text-gray-800 dark:text-white group-hover:scale-110" />
+                </button>
+                <button
+                  onClick={nextSlide}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-lg flex items-center justify-center hover:bg-white hover:scale-110 transition-all duration-200 group"
+                >
+                  <ChevronRightIcon className="w-6 h-6 text-gray-800 dark:text-white group-hover:scale-110" />
+                </button>
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Slide Indicators */}
+            <div className="flex justify-center gap-2 mt-8">
+              {sliderImages.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentSlide(index)}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    index === currentSlide
+                      ? 'w-8 bg-white'
+                      : 'w-2 bg-white/40 hover:bg-white/60'
+                  }`}
+                />
+              ))}
+            </div>
+
+            {/* Feature Points */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="mt-12 grid grid-cols-3 gap-4"
+            >
+              {[
+                { icon: CheckCircleIcon, text: 'Easy Setup' },
+                { icon: CheckCircleIcon, text: 'Secure Payments' },
+                { icon: CheckCircleIcon, text: 'Pro Tools' }
+              ].map((feature, index) => (
+                <div key={index} className="flex flex-col items-center text-center text-white">
+                  <feature.icon className="w-8 h-8 mb-2 text-green-400" />
+                  <span className="text-sm font-medium">{feature.text}</span>
+                </div>
+              ))}
+            </motion.div>
+          </div>
+        </div>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-lg"
-      >
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8">
+      {/* Right Side - Registration Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-4 lg:p-8 relative overflow-y-auto">
+        {/* Theme Toggle */}
+        <div className="absolute top-4 right-4">
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 shadow-md hover:shadow-lg transition-all duration-200"
+          >
+            {theme === 'light' ? (
+              <MoonIcon className="h-5 w-5 text-gray-600" />
+            ) : (
+              <SunIcon className="h-5 w-5 text-yellow-400" />
+            )}
+          </button>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md"
+        >
+          {/* Header */}
           <div className="text-center mb-8">
             <motion.div
               initial={{ scale: 0 }}
@@ -177,7 +397,7 @@ const Register = () => {
               </svg>
             </motion.div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Join InvoiciFy
+              Join InvoiceGear
             </h1>
             <p className="text-gray-600 dark:text-gray-300">
               Create your account and start managing invoices
@@ -188,8 +408,8 @@ const Register = () => {
           <div className="flex items-center justify-center mb-8">
             <div className="flex items-center">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                step >= 1 
-                  ? 'bg-primary-600 text-white' 
+                step >= 1
+                  ? 'bg-primary-600 text-white'
                   : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
               }`}>
                 1
@@ -198,8 +418,8 @@ const Register = () => {
                 step >= 2 ? 'bg-primary-600' : 'bg-gray-200 dark:bg-gray-700'
               }`} />
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                step >= 2 
-                  ? 'bg-primary-600 text-white' 
+                step >= 2
+                  ? 'bg-primary-600 text-white'
                   : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
               }`}>
                 2
@@ -514,26 +734,26 @@ const Register = () => {
               </Link>
             </p>
           </div>
-        </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="text-center mt-8"
-        >
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            By creating an account, you agree to our{' '}
-            <button type="button" className="text-primary-600 hover:text-primary-500 underline">
-              Terms of Service
-            </button>{' '}
-            and{' '}
-            <button type="button" className="text-primary-600 hover:text-primary-500 underline">
-              Privacy Policy
-            </button>
-          </p>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="text-center mt-6"
+          >
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              By creating an account, you agree to our{' '}
+              <button type="button" className="text-primary-600 hover:text-primary-500 underline">
+                Terms of Service
+              </button>{' '}
+              and{' '}
+              <button type="button" className="text-primary-600 hover:text-primary-500 underline">
+                Privacy Policy
+              </button>
+            </p>
+          </motion.div>
         </motion.div>
-      </motion.div>
+      </div>
     </div>
   );
 };

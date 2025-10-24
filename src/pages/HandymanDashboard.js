@@ -42,27 +42,17 @@ const HandymanDashboard = () => {
     );
   }
 
-  // Mock data for demonstration
-  const mockData = {
-    totalEarnings: 2940,
-    pendingPayouts: 588,
-    completedJobs: 10,
-    averageRating: 4.8,
-    recentPayments: [
-      { id: 1, date: '2025-09-17', client: 'John Doe', amount: 294, status: 'completed' },
-      { id: 2, date: '2025-09-16', client: 'Jane Smith', amount: 294, status: 'completed' },
-      { id: 3, date: '2025-09-15', client: 'Bob Wilson', amount: 294, status: 'pending' },
-      { id: 4, date: '2025-09-14', client: 'Alice Brown', amount: 294, status: 'completed' },
-      { id: 5, date: '2025-09-13', client: 'Charlie Davis', amount: 294, status: 'completed' },
-    ],
-    upcomingJobs: [
-      { id: 1, date: '2025-09-18', time: '10:00 AM', client: 'Sarah Johnson', service: 'Home Repair' },
-      { id: 2, date: '2025-09-19', time: '2:00 PM', client: 'Mike Thompson', service: 'Plumbing' },
-      { id: 3, date: '2025-09-20', time: '9:00 AM', client: 'Emma Wilson', service: 'Electrical' },
-    ]
-  };
+  if (!dashboardData) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">No dashboard data available</p>
+        </div>
+      </div>
+    );
+  }
 
-  const data = dashboardData || mockData;
+  const data = dashboardData;
 
   return (
     <div className="min-h-screen bg-gray-50">

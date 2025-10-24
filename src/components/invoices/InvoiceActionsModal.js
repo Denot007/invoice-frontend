@@ -82,6 +82,7 @@ const InvoiceActionsModal = ({
       hoverBgColor: 'hover:bg-blue-100 dark:hover:bg-blue-800/50',
       borderColor: 'border-blue-200/50 dark:border-blue-700/50',
       onClick: () => { onClose(); setTimeout(() => onEdit(invoice), 100); },
+      show: invoice.status !== 'paid', // Hide edit button for paid invoices
     },
     {
       id: 'duplicate',
@@ -115,6 +116,7 @@ const InvoiceActionsModal = ({
       hoverBgColor: 'hover:bg-red-100 dark:hover:bg-red-800/50',
       borderColor: 'border-red-200/50 dark:border-red-700/50',
       onClick: () => { onClose(); setTimeout(() => onDelete(invoice), 100); },
+      show: invoice.status === 'draft', // Only show delete for draft invoices
     },
   ];
 

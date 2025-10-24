@@ -153,12 +153,20 @@ const Settings = () => {
 
   const handleUpgrade = async (planId) => {
     try {
+      const response = await billingService.createCheckoutSession(planId);
+
+      // Check if this is a scheduled downgrade (no payment required)
+      if (response.scheduled_downgrade) {
+        toast.success(response.message);
+        // Reload billing data to show the scheduled change
+        await loadBillingData();
+        return;
+      }
+
       // Mark that checkout has been initiated
       setCheckoutInitiated(true);
       localStorage.setItem('invoicify_checkout_initiated', 'true');
-      
-      const response = await billingService.createCheckoutSession(planId);
-      
+
       if (response.checkout_url) {
         // Redirect to Stripe Checkout
         window.location.href = response.checkout_url;
@@ -368,11 +376,9 @@ const Settings = () => {
                     <div className="flex items-center space-x-3">
                       <div>
                         <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {subscription.plan?.name || 'Free Trial'}
+                          {subscription.plan?.name || 'Free Plan'}
                         </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {subscription.plan ? `$${subscription.plan.price}/${subscription.plan.interval}` : 'No charge during trial'}
-                        </p>
+                       
                       </div>
                     </div>
                     {getStatusBadge(subscription.status)}
@@ -384,7 +390,7 @@ const Settings = () => {
                         <SparklesIcon className="h-5 w-5 text-blue-500 mr-2" />
                         <div>
                           <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                            Free Trial Active
+                            Free plan Active
                           </p>
                           <p className="text-sm text-blue-700 dark:text-blue-300">
                             {subscription.days_remaining_in_trial} days remaining in your free trial
@@ -442,6 +448,28 @@ const Settings = () => {
                     </div>
                   )}
 
+                  {subscription.scheduled_plan_change && subscription.scheduled_change_date && (
+                    <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+                      <div className="flex items-center">
+                        <ArrowPathIcon className="h-5 w-5 text-purple-500 mr-2" />
+                        <div>
+                          <p className="text-sm font-medium text-purple-900 dark:text-purple-100">
+                            Plan Change Scheduled
+                          </p>
+                          <p className="text-sm text-purple-700 dark:text-purple-300">
+                            Your plan will change to <strong>{subscription.scheduled_plan_change.name}</strong> on{' '}
+                            {new Date(subscription.scheduled_change_date).toLocaleDateString('en-US', {
+                              month: 'long',
+                              day: 'numeric',
+                              year: 'numeric'
+                            })}.
+                            You'll continue to have access to your current plan features until then.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex justify-end space-x-3">
                     {subscription.plan && !subscription.is_canceled && (
                       <>
@@ -486,14 +514,7 @@ const Settings = () => {
                           <ArrowPathIcon className="h-4 w-4 mr-2" />
                           Sync Status
                         </button>
-                        <button
-                          onClick={handleExpireTrial}
-                          className="btn-secondary flex items-center text-red-600 border-red-300 hover:bg-red-50"
-                          title="Test subscription blocking (Development only)"
-                        >
-                          <ExclamationTriangleIcon className="h-4 w-4 mr-2" />
-                          Test Expire Trial
-                        </button>
+                       
                       </>
                     )}
                   </div>
@@ -513,7 +534,7 @@ const Settings = () => {
                 {plans.map((plan) => {
                   const isCurrentPlan = subscription?.plan?.id === plan.id;
                   const isRecommended = plan.interval === 'monthly';
-                  
+
                   return (
                     <div
                       key={plan.id}
@@ -573,7 +594,7 @@ const Settings = () => {
                             {subscription?.plan ? 'Switch Plan' : 'Get Started'}
                           </button>
                         )}
-                        
+
                         {isCurrentPlan && (
                           <div className="text-center text-sm text-green-600 dark:text-green-400 font-medium">
                             ✓ This is your current plan

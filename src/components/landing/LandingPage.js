@@ -10,7 +10,6 @@ import {
   UserGroupIcon,
   CheckCircleIcon,
   ArrowRightIcon,
-  PlayIcon,
   StarIcon,
   DevicePhoneMobileIcon,
   ComputerDesktopIcon,
@@ -22,7 +21,6 @@ import {
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const [setIsVideoPlaying] = useState(false);
   const [pricing, setPricing] = useState({
     weekly: 5.99,
     monthly: 22.99,
@@ -31,6 +29,18 @@ const LandingPage = () => {
     has_active_promotion: false,
     promotion: null
   });
+
+  // Smooth scroll handler for navigation links
+  const handleNavClick = (e, targetId) => {
+    e.preventDefault();
+    const element = document.querySelector(targetId);
+    if (element) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  };
 
   // Fetch dynamic pricing on component mount
   useEffect(() => {
@@ -71,6 +81,32 @@ const LandingPage = () => {
     animate: {
       transition: {
         staggerChildren: 0.1
+      }
+    }
+  };
+
+  const scaleIn = {
+    initial: { opacity: 0, scale: 0.8 },
+    animate: { opacity: 1, scale: 1 },
+    transition: { duration: 0.7, ease: "easeOut" }
+  };
+
+  const slideInRotate = {
+    initial: { opacity: 0, x: -100, rotate: -10 },
+    animate: { opacity: 1, x: 0, rotate: 0 },
+    transition: { duration: 0.8, ease: "easeOut" }
+  };
+
+  const bounceIn = {
+    initial: { opacity: 0, scale: 0.3 },
+    animate: { opacity: 1, scale: 1 },
+    transition: {
+      duration: 0.6,
+      ease: "easeOut",
+      scale: {
+        type: "spring",
+        damping: 10,
+        stiffness: 100
       }
     }
   };
@@ -176,24 +212,34 @@ const LandingPage = () => {
           </motion.div>
           
           <div className="hidden md:flex items-center space-x-8">
-            <motion.a 
+            <motion.a
               whileHover={{ scale: 1.05 }}
-              href="#features" 
-              className="text-gray-300 hover:text-white transition-colors"
+              href="#features"
+              onClick={(e) => handleNavClick(e, '#features')}
+              className="text-gray-300 hover:text-white transition-colors cursor-pointer"
             >
               Features
             </motion.a>
-            <motion.a 
+            <motion.a
               whileHover={{ scale: 1.05 }}
-              href="#pricing" 
-              className="text-gray-300 hover:text-white transition-colors"
+              href="#pricing"
+              onClick={(e) => handleNavClick(e, '#pricing')}
+              className="text-gray-300 hover:text-white transition-colors cursor-pointer"
             >
               Pricing
             </motion.a>
-            <motion.a 
+            <motion.button
               whileHover={{ scale: 1.05 }}
-              href="#contact" 
-              className="text-gray-300 hover:text-white transition-colors"
+              onClick={() => navigate('/getting-started')}
+              className="text-gray-300 hover:text-white transition-colors cursor-pointer"
+            >
+              How It Works
+            </motion.button>
+            <motion.a
+              whileHover={{ scale: 1.05 }}
+              href="#contact"
+              onClick={(e) => handleNavClick(e, '#contact')}
+              className="text-gray-300 hover:text-white transition-colors cursor-pointer"
             >
               Contact
             </motion.a>
@@ -248,7 +294,7 @@ const LandingPage = () => {
                 Get paid faster and manage your business better.
               </motion.p>
 
-              <motion.div 
+              <motion.div
                 variants={fadeInUp}
                 className="flex flex-col sm:flex-row gap-4"
               >
@@ -258,22 +304,12 @@ const LandingPage = () => {
                   onClick={() => navigate('/register')}
                   className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:shadow-2xl transition-all flex items-center justify-center space-x-2"
                 >
-                  <span>Start Free Trial</span>
+                  <span>Get Started Free</span>
                   <ArrowRightIcon className="w-5 h-5" />
-                </motion.button>
-                
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="border-2 border-white/20 text-white px-8 py-4 rounded-full font-semibold text-lg backdrop-blur-sm hover:bg-white/10 transition-all flex items-center justify-center space-x-2"
-                  onClick={() => setIsVideoPlaying(true)}
-                >
-                  <PlayIcon className="w-5 h-5" />
-                  <span>Watch Demo</span>
                 </motion.button>
               </motion.div>
 
-              <motion.div 
+              <motion.div
                 variants={fadeInUp}
                 className="flex items-center space-x-6 text-gray-400"
               >
@@ -283,7 +319,7 @@ const LandingPage = () => {
                 </div>
                 <div className="flex items-center space-x-2">
                   <CheckCircleIcon className="w-5 h-5 text-green-400" />
-                  <span>14-day free trial</span>
+                  <span>Free plan available</span>
                 </div>
               </motion.div>
             </motion.div>
@@ -324,16 +360,31 @@ const LandingPage = () => {
           </div>
         </div>
 
-        {/* Floating Elements */}
+        {/* Enhanced Floating Elements */}
         <motion.div
-          animate={{ y: [0, -20, 0], rotate: [0, 5, 0] }}
+          animate={{ y: [0, -20, 0], rotate: [0, 5, 0], scale: [1, 1.1, 1] }}
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-20 right-10 w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full opacity-20"
+          className="absolute top-20 right-10 w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full opacity-20 blur-sm"
         />
         <motion.div
-          animate={{ y: [0, 20, 0], rotate: [0, -5, 0] }}
+          animate={{ y: [0, 20, 0], rotate: [0, -5, 0], scale: [1, 1.2, 1] }}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-20 left-10 w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full opacity-20"
+          className="absolute bottom-20 left-10 w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full opacity-20 blur-sm"
+        />
+        <motion.div
+          animate={{ y: [0, -15, 0], x: [0, 10, 0], rotate: [0, 10, 0] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/3 left-1/4 w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-lg opacity-15 blur-sm"
+        />
+        <motion.div
+          animate={{ y: [0, 25, 0], x: [0, -15, 0], rotate: [0, -15, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-1/4 right-1/3 w-10 h-10 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full opacity-15 blur-sm"
+        />
+        <motion.div
+          animate={{ y: [0, -30, 0], scale: [1, 1.3, 1] }}
+          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/2 right-1/4 w-6 h-6 bg-gradient-to-r from-green-400 to-teal-500 rounded-full opacity-10 blur-sm"
         />
       </section>
 
@@ -414,13 +465,24 @@ const LandingPage = () => {
             {platforms.map((platform, index) => (
               <motion.div
                 key={index}
-                variants={fadeInUp}
-                whileHover={{ y: -10 }}
-                className="text-center group"
+                variants={bounceIn}
+                whileInView={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, scale: 0.5 }}
+                transition={{ delay: index * 0.2, duration: 0.6 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -15, rotate: 2 }}
+                className="text-center group relative"
               >
-                <div className={`w-24 h-24 mx-auto mb-6 ${platform.color} bg-white/10 rounded-3xl flex items-center justify-center group-hover:bg-white/20 transition-all`}>
+                {/* Glow effect on hover */}
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 to-purple-500/0 group-hover:from-blue-500/20 group-hover:to-purple-500/20 rounded-3xl blur-xl transition-all duration-500"></div>
+
+                <motion.div
+                  className={`relative w-24 h-24 mx-auto mb-6 ${platform.color} bg-white/10 rounded-3xl flex items-center justify-center group-hover:bg-white/20 transition-all`}
+                  whileHover={{ rotate: 360, scale: 1.1 }}
+                  transition={{ duration: 0.6 }}
+                >
                   <platform.icon className="w-12 h-12" />
-                </div>
+                </motion.div>
                 <h3 className="text-2xl font-bold text-white mb-4">{platform.title}</h3>
                 <p className="text-gray-300 leading-relaxed">{platform.description}</p>
               </motion.div>
@@ -457,41 +519,38 @@ const LandingPage = () => {
             viewport={{ once: true }}
             className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto"
           >
-            {/* Weekly Plan */}
+            {/* Free Plan */}
             <motion.div
               variants={fadeInUp}
-              whileHover={{ 
+              whileHover={{
                 scale: 1.02,
                 boxShadow: "0 20px 40px rgba(0,0,0,0.3)"
               }}
-              className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/20 hover:border-blue-400/40 transition-all"
+              className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/20 hover:border-green-400/40 transition-all"
             >
               <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <BoltIcon className="w-8 h-8 text-white" />
+                <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <CheckCircleIcon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-2">Weekly Plan</h3>
+                <h3 className="text-2xl font-bold text-white mb-2">Free Plan</h3>
                 <div className="mb-6">
-                  <span className="text-4xl font-bold text-white">${pricing.weekly}</span>
-                  <span className="text-gray-400">/week</span>
-                  {pricing.has_active_promotion && (
-                    <div className="mt-2">
-                      <span className="inline-block bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                        {pricing.promotion.discount_percentage}% OFF
-                      </span>
-                    </div>
-                  )}
+                  <span className="text-4xl font-bold text-white">$0</span>
+                  <span className="text-gray-400">/month</span>
                 </div>
-                <p className="text-gray-300 mb-6">Perfect for short-term projects and testing</p>
-                
+                <p className="text-gray-300 mb-6">Perfect to get started</p>
+
                 <ul className="space-y-3 mb-8 text-left">
                   <li className="flex items-center space-x-3">
                     <CheckCircleIcon className="w-5 h-5 text-green-400 flex-shrink-0" />
-                    <span className="text-gray-300">Unlimited invoices</span>
+                    <span className="text-gray-300">5 invoices per month</span>
                   </li>
                   <li className="flex items-center space-x-3">
                     <CheckCircleIcon className="w-5 h-5 text-green-400 flex-shrink-0" />
-                    <span className="text-gray-300">Client management</span>
+                    <span className="text-gray-300">Up to 10 clients</span>
+                  </li>
+                  <li className="flex items-center space-x-3">
+                    <CheckCircleIcon className="w-5 h-5 text-green-400 flex-shrink-0" />
+                    <span className="text-gray-300">5 estimates per month</span>
                   </li>
                   <li className="flex items-center space-x-3">
                     <CheckCircleIcon className="w-5 h-5 text-green-400 flex-shrink-0" />
@@ -499,21 +558,17 @@ const LandingPage = () => {
                   </li>
                   <li className="flex items-center space-x-3">
                     <CheckCircleIcon className="w-5 h-5 text-green-400 flex-shrink-0" />
-                    <span className="text-gray-300">Mobile app access</span>
-                  </li>
-                  <li className="flex items-center space-x-3">
-                    <CheckCircleIcon className="w-5 h-5 text-green-400 flex-shrink-0" />
                     <span className="text-gray-300">Basic reporting</span>
                   </li>
                 </ul>
-                
+
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => navigate('/register')}
-                  className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all"
+                  className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all"
                 >
-                  Start {pricing.trial_days}-Day Trial
+                  Get Started Free
                 </motion.button>
               </div>
             </motion.div>
@@ -521,18 +576,18 @@ const LandingPage = () => {
             {/* Monthly Plan - Featured */}
             <motion.div
               variants={fadeInUp}
-              whileHover={{ 
+              whileHover={{
                 scale: 1.02,
                 boxShadow: "0 20px 40px rgba(0,0,0,0.3)"
               }}
               className="bg-gradient-to-br from-blue-500/20 to-purple-600/20 backdrop-blur-sm rounded-2xl p-8 border-2 border-blue-400 relative"
             >
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <span className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 text-sm font-bold rounded-full">
+                <span className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 text-sm font-bold rounded-full whitespace-nowrap">
                   MOST POPULAR
                 </span>
               </div>
-              
+
               <div className="text-center">
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
                   <StarIcon className="w-8 h-8 text-white" />
@@ -549,12 +604,20 @@ const LandingPage = () => {
                     </div>
                   )}
                 </div>
-                <p className="text-gray-300 mb-6">Ideal for growing businesses and freelancers</p>
-                
+                <p className="text-gray-300 mb-6">Ideal for growing businesses</p>
+
                 <ul className="space-y-3 mb-8 text-left">
                   <li className="flex items-center space-x-3">
                     <CheckCircleIcon className="w-5 h-5 text-green-400 flex-shrink-0" />
-                    <span className="text-gray-300">Everything in Weekly</span>
+                    <span className="text-gray-300">Unlimited invoices</span>
+                  </li>
+                  <li className="flex items-center space-x-3">
+                    <CheckCircleIcon className="w-5 h-5 text-green-400 flex-shrink-0" />
+                    <span className="text-gray-300">Unlimited clients</span>
+                  </li>
+                  <li className="flex items-center space-x-3">
+                    <CheckCircleIcon className="w-5 h-5 text-green-400 flex-shrink-0" />
+                    <span className="text-gray-300">Unlimited estimates</span>
                   </li>
                   <li className="flex items-center space-x-3">
                     <CheckCircleIcon className="w-5 h-5 text-green-400 flex-shrink-0" />
@@ -568,19 +631,15 @@ const LandingPage = () => {
                     <CheckCircleIcon className="w-5 h-5 text-green-400 flex-shrink-0" />
                     <span className="text-gray-300">Priority support</span>
                   </li>
-                  <li className="flex items-center space-x-3">
-                    <CheckCircleIcon className="w-5 h-5 text-green-400 flex-shrink-0" />
-                    <span className="text-gray-300">Multi-currency support</span>
-                  </li>
                 </ul>
-                
+
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => navigate('/register')}
                   className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all"
                 >
-                  Start {pricing.trial_days}-Day Trial
+                  Upgrade to Monthly
                 </motion.button>
               </div>
             </motion.div>
@@ -588,20 +647,20 @@ const LandingPage = () => {
             {/* Yearly Plan */}
             <motion.div
               variants={fadeInUp}
-              whileHover={{ 
+              whileHover={{
                 scale: 1.02,
                 boxShadow: "0 20px 40px rgba(0,0,0,0.3)"
               }}
-              className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/20 hover:border-green-400/40 transition-all relative"
+              className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/20 hover:border-yellow-400/40 transition-all relative"
             >
               <div className="absolute -top-4 right-4">
-                <span className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-1 text-xs font-bold rounded-full">
-                  SAVE 27%
+                <span className="bg-gradient-to-r from-yellow-500 to-orange-600 text-white px-4 py-1 text-xs font-bold rounded-full">
+                  BEST VALUE
                 </span>
               </div>
-              
+
               <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <div className="w-16 h-16 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
                   <CurrencyDollarIcon className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-2">Yearly Plan</h3>
@@ -616,11 +675,11 @@ const LandingPage = () => {
                     </div>
                   )}
                 </div>
-                <div className="text-green-400 text-sm font-semibold mb-6">
-                  (~${(pricing.yearly / 12).toFixed(2)}/month)
+                <div className="text-yellow-400 text-sm font-semibold mb-6">
+                  (~${(pricing.yearly / 12).toFixed(2)}/month - Save 27%)
                 </div>
-                <p className="text-gray-300 mb-6">Best value for established businesses</p>
-                
+                <p className="text-gray-300 mb-6">Best value for professionals</p>
+
                 <ul className="space-y-3 mb-8 text-left">
                   <li className="flex items-center space-x-3">
                     <CheckCircleIcon className="w-5 h-5 text-green-400 flex-shrink-0" />
@@ -643,14 +702,14 @@ const LandingPage = () => {
                     <span className="text-gray-300">API access</span>
                   </li>
                 </ul>
-                
+
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => navigate('/register')}
-                  className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all"
+                  className="w-full bg-gradient-to-r from-yellow-500 to-orange-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all"
                 >
-                  Start {pricing.trial_days}-Day Trial
+                  Upgrade to Yearly
                 </motion.button>
               </div>
             </motion.div>
@@ -681,7 +740,7 @@ const LandingPage = () => {
                 </div>
                 <div className="flex flex-col items-center">
                   <CheckCircleIcon className="w-12 h-12 text-green-400 mb-3" />
-                  <span className="text-gray-300 font-medium">14-Day Free Trial</span>
+                  <span className="text-gray-300 font-medium">24/7 Support</span>
                 </div>
               </div>
             </div>
@@ -788,23 +847,50 @@ const LandingPage = () => {
             {testimonials.map((testimonial, index) => (
               <motion.div
                 key={index}
-                variants={fadeInUp}
-                whileHover={{ y: -10 }}
-                className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/20"
+                initial={{ opacity: 0, x: index % 2 === 0 ? -100 : 100, rotate: index % 2 === 0 ? -5 : 5 }}
+                whileInView={{ opacity: 1, x: 0, rotate: 0 }}
+                transition={{
+                  duration: 0.8,
+                  delay: index * 0.15,
+                  type: "spring",
+                  stiffness: 100
+                }}
+                viewport={{ once: true }}
+                whileHover={{ y: -15, scale: 1.03, rotate: 1 }}
+                className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/20 hover:border-white/40 transition-all relative group"
               >
-                <div className="flex items-center space-x-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <StarIcon key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                  ))}
-                </div>
-                <p className="text-gray-300 mb-6 italic">"{testimonial.text}"</p>
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                    {testimonial.avatar}
+                {/* Animated glow on hover */}
+                <motion.div
+                  className="absolute -inset-1 bg-gradient-to-r from-yellow-400/0 via-orange-400/0 to-yellow-400/0 group-hover:from-yellow-400/20 group-hover:via-orange-400/20 group-hover:to-yellow-400/20 rounded-2xl blur-lg transition-all duration-500"
+                ></motion.div>
+
+                <div className="relative">
+                  <div className="flex items-center space-x-1 mb-4">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, scale: 0, rotate: -180 }}
+                        whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
+                        transition={{ delay: index * 0.15 + i * 0.1, duration: 0.5 }}
+                        viewport={{ once: true }}
+                      >
+                        <StarIcon className="w-5 h-5 text-yellow-400 fill-current" />
+                      </motion.div>
+                    ))}
                   </div>
-                  <div>
-                    <div className="text-white font-semibold">{testimonial.name}</div>
-                    <div className="text-gray-400 text-sm">{testimonial.role}</div>
+                  <p className="text-gray-300 mb-6 italic">"{testimonial.text}"</p>
+                  <div className="flex items-center space-x-4">
+                    <motion.div
+                      className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold"
+                      whileHover={{ scale: 1.2, rotate: 360 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      {testimonial.avatar}
+                    </motion.div>
+                    <div>
+                      <div className="text-white font-semibold">{testimonial.name}</div>
+                      <div className="text-gray-400 text-sm">{testimonial.role}</div>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -830,7 +916,7 @@ const LandingPage = () => {
               Join thousands of businesses already using InvoiceGear to streamline their invoicing process.
             </p>
             <motion.button
-              whileHover={{ 
+              whileHover={{
                 scale: 1.05,
                 boxShadow: "0 20px 40px rgba(0,0,0,0.3)"
               }}
@@ -838,7 +924,7 @@ const LandingPage = () => {
               onClick={() => navigate('/register')}
               className="bg-white text-blue-600 px-12 py-4 rounded-full font-bold text-xl hover:shadow-2xl transition-all"
             >
-              Start Your Free Trial
+              Get Started Free
             </motion.button>
           </motion.div>
         </div>

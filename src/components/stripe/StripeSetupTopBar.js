@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { ExclamationTriangleIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
+// eslint-disable-next-line unused-imports/no-unused-imports
 import { marketplaceService } from '../../services/marketplaceService';
+// eslint-disable-next-line unused-imports/no-unused-imports
 import { toast } from 'react-toastify';
 
 const StripeSetupTopBar = () => {
   const [stripeStatus, setStripeStatus] = useState(null);
   const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const [setupLoading, setSetupLoading] = useState(false);
 
   useEffect(() => {

@@ -23,6 +23,7 @@ import ClientModal from '../components/clients/ClientModal';
 import ClientDetailsModal from '../components/clients/ClientDetailsModal';
 import ClientInvoicesModal from '../components/clients/ClientInvoicesModal';
 import DeleteConfirmModal from '../components/common/DeleteConfirmModal';
+import UpgradeModal from '../components/common/UpgradeModal';
 import InvoiceModal from '../components/invoices/InvoiceModal';
 import InvoiceViewModal from '../components/invoices/InvoiceViewModal';
 import clientService from '../services/clientService';
@@ -39,9 +40,9 @@ const Clients = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
-  const [dataSource, setDataSource] = useState(null);
   const [stats, setStats] = useState({});
   const [clientInvoiceStats, setClientInvoiceStats] = useState({});
+  const [usageLimits, setUsageLimits] = useState(null);
   
   // Modal states
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -64,13 +65,15 @@ const Clients = () => {
   const [isInvoiceViewModalOpen, setIsInvoiceViewModalOpen] = useState(false);
   const [invoiceToView, setInvoiceToView] = useState(null);
 
+  // Upgrade modal state
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+
   // Fetch all clients (no search/filter parameters)
   const fetchClients = async () => {
     setLoading(true);
     try {
       const result = await clientService.getClients();
       setAllClients(result.data || []);
-      setDataSource(result.source);
     } catch (error) {
       console.error('Error fetching clients:', error);
       setAllClients([]);
@@ -79,10 +82,21 @@ const Clients = () => {
     }
   };
 
+  // Fetch usage limits
+  const fetchUsageLimits = async () => {
+    try {
+      const result = await clientService.getUsageLimits();
+      setUsageLimits(result);
+    } catch (error) {
+      console.error('Error fetching usage limits:', error);
+    }
+  };
+
   // Initial data load
   useEffect(() => {
     fetchClients();
     fetchClientInvoiceStats();
+    fetchUsageLimits();
   }, []);
 
   // Calculate stats whenever allClients changes
@@ -196,11 +210,12 @@ const Clients = () => {
 
   const handleDeleteConfirm = async () => {
     if (!clientToDelete) return;
-    
+
     setIsDeleting(true);
     try {
       await clientService.deleteClient(clientToDelete._id || clientToDelete.id);
       await fetchClients();
+      await fetchUsageLimits(); // Refresh usage counter
       setIsDeleteModalOpen(false);
       setClientToDelete(null);
       toast.success('Client deleted successfully!');
@@ -407,35 +422,39 @@ const Clients = () => {
           animate={{ opacity: 1, x: 0 }}
         >
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Clients</h1>
-          <div className="flex items-center gap-2 mt-1">
-            <p className="text-gray-600 dark:text-gray-400">
-              Manage your client relationships
-            </p>
-            {dataSource && (
-              <span className={`px-2 py-1 text-xs rounded-full ${
-                dataSource === 'api' 
-                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
-                  : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-              }`}>
-                {dataSource === 'api' ? '🟢 Live Data' : '🟡 Demo Mode'}
-              </span>
-            )}
-          </div>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            Manage your client relationships
+          </p>
         </motion.div>
-        <motion.button
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            setSelectedClient(null);
-            setIsModalOpen(true);
-          }}
-          className="btn-primary flex items-center"
-        >
-          <PlusIcon className="h-5 w-5 mr-2" />
-          New Client
-        </motion.button>
+        <div className="flex flex-col items-end gap-2">
+          {usageLimits && usageLimits.is_free_tier && (
+            <span className="text-xs text-gray-600 dark:text-gray-400">
+              {usageLimits.current_usage} / {usageLimits.limit} clients used
+            </span>
+          )}
+          <motion.button
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              if (usageLimits && !usageLimits.can_add_more) {
+                setIsUpgradeModalOpen(true);
+                return;
+              }
+              setSelectedClient(null);
+              setIsModalOpen(true);
+            }}
+            className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+              usageLimits && !usageLimits.can_add_more
+                ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/50'
+                : 'btn-primary'
+            }`}
+          >
+            <PlusIcon className="h-5 w-5 mr-2" />
+            {usageLimits && !usageLimits.can_add_more ? 'Upgrade to Add More' : 'New Client'}
+          </motion.button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -707,7 +726,8 @@ const Clients = () => {
               await clientService.createClient(clientData);
             }
             await fetchClients();
-                  setIsModalOpen(false);
+            await fetchUsageLimits(); // Refresh usage counter
+            setIsModalOpen(false);
             setSelectedClient(null);
             toast.success(selectedClient ? 'Client updated successfully!' : 'Client created successfully!');
           } catch (error) {
@@ -771,6 +791,15 @@ const Clients = () => {
           setInvoiceToView(null);
         }}
         invoice={invoiceToView}
+      />
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        isOpen={isUpgradeModalOpen}
+        onClose={() => setIsUpgradeModalOpen(false)}
+        currentUsage={usageLimits?.current_usage || 0}
+        limit={usageLimits?.limit || 0}
+        resourceType="clients"
       />
     </div>
   );

@@ -242,7 +242,7 @@ const CookiePolicy = () => {
             </p>
             <div className={`mt-4 p-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'} rounded-md`}>
               <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                Email: privacy@invoicify.com<br />
+                Email: app@invoicegear.com<br />
                 Subject: Cookie Policy Inquiry<br />
                 Address: [Your Business Address]
               </p>

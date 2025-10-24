@@ -31,7 +31,7 @@ const TermsOfService = () => {
               Acceptance of Terms
             </h2>
             <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} leading-relaxed`}>
-              By accessing and using InvoiciFy ("the Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
+              By accessing and using InvoiceGear ("the Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
             </p>
           </section>
 
@@ -209,7 +209,7 @@ const TermsOfService = () => {
             </p>
             <div className={`mt-4 p-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'} rounded-md`}>
               <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                Email: support@invoicify.com<br />
+                Email: support@invoicegear.com<br />
                 Address: [Your Business Address]<br />
                 Phone: [Your Phone Number]
               </p>

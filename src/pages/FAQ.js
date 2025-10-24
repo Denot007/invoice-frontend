@@ -234,7 +234,7 @@ const FAQ = () => {
               Contact Support
             </a>
             <a
-              href="mailto:support@invoicify.com"
+              href="mailto:support@invoicegear.com"
               className={`inline-flex items-center justify-center px-6 py-3 border rounded-md text-base font-medium transition-colors
                 ${theme === 'dark' 
                   ? 'border-gray-600 text-gray-300 hover:bg-gray-700' 

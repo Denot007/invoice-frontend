@@ -76,7 +76,7 @@ const AboutUs = () => {
             </div>
           </div>
           <h1 className={`text-4xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-            About InvoiciFy
+            About InvoiceGear
           </h1>
           <p className={`text-xl leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
             We're on a mission to simplify invoice management for small businesses and freelancers worldwide.

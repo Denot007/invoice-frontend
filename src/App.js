@@ -10,6 +10,7 @@ import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
 import StripeSetupTopBar from './components/stripe/StripeSetupTopBar';
 import LandingPage from './components/landing/LandingPage';
+import GettingStarted from './components/guide/GettingStarted';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import ResetPassword from './components/auth/ResetPassword';
@@ -138,6 +139,9 @@ function App() {
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<LandingPage />} />
+                <Route path="/getting-started" element={<GettingStarted />} />
+                <Route path="/guide" element={<GettingStarted />} />
+                <Route path="/how-to-use" element={<GettingStarted />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/signup" element={<Navigate to="/register" />} />

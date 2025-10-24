@@ -34,6 +34,7 @@ const Footer = () => {
       { name: 'Reports & Analytics', href: '#features' },
     ],
     resources: [
+      { name: 'Getting Started Guide', href: '/getting-started' },
       { name: 'Documentation', href: '#' },
       { name: 'API Reference', href: '#' },
       { name: 'Support Center', href: '#' },
@@ -152,11 +153,16 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className={`mt-8 pt-8 border-t ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}>
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-              © {currentYear} InvoiceGear. All rights reserved.
-            </p>
-            <div className="flex items-center mt-4 md:mt-0 space-x-4">
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div className="flex flex-col items-center md:items-start space-y-2">
+              <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                © {currentYear} InvoiceGear. All rights reserved.
+              </p>
+              <p className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+                A product of <span className="font-semibold">Trannova Technologies LLC</span>
+              </p>
+            </div>
+            <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-4">
               <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                 Made with ❤️ for small businesses
               </span>

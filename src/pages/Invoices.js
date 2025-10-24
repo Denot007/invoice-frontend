@@ -12,13 +12,16 @@ import {
   DocumentTextIcon,
   XCircleIcon,
   Cog6ToothIcon,
+  CurrencyDollarIcon,
 } from '@heroicons/react/24/outline';
 import InvoiceModal from '../components/invoices/InvoiceModal';
 import InvoiceViewModal from '../components/invoices/InvoiceViewModal';
 import PaymentModal from '../components/invoices/PaymentModal';
 import QuickPaymentModal from '../components/invoices/QuickPaymentModal';
 import InvoiceActionsModal from '../components/invoices/InvoiceActionsModal';
+import TemplateSelectionModal from '../components/invoices/TemplateSelectionModal';
 import DeleteConfirmModal from '../components/common/DeleteConfirmModal';
+import UpgradeModal from '../components/common/UpgradeModal';
 import StripeSetupBanner from '../components/stripe/StripeSetupBanner';
 import invoiceService from '../services/invoiceService';
 import documentService from '../services/documentService';
@@ -34,8 +37,11 @@ const Invoices = () => {
   const [isQuickPaymentModalOpen, setIsQuickPaymentModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
+  const [isTemplateSelectionModalOpen, setIsTemplateSelectionModalOpen] = useState(false);
   const [actionsModalPosition, setActionsModalPosition] = useState({ x: 0, y: 0 });
   const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [newlyCreatedInvoice, setNewlyCreatedInvoice] = useState(null);
+  const [isDuplicatedInvoice, setIsDuplicatedInvoice] = useState(false);
   const [invoiceToDelete, setInvoiceToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [pendingStatusChange, setPendingStatusChange] = useState(null);
@@ -46,9 +52,13 @@ const Invoices = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [selectedInvoices, setSelectedInvoices] = useState(new Set());
   const [isExportingMultiple, setIsExportingMultiple] = useState(false);
+  const [stats, setStats] = useState({});
+  const [usageLimits, setUsageLimits] = useState(null);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
 
   useEffect(() => {
     fetchInvoices();
+    fetchUsageLimits();
   }, [filterStatus]);
 
   const fetchInvoices = async () => {
@@ -59,10 +69,14 @@ const Invoices = () => {
         params.status = filterStatus;
       }
       // Remove search from API call - we'll filter on client side
-      
+
       const result = await invoiceService.getInvoices(params);
-      setInvoices(result.data || []);
+      const invoiceData = result.data || [];
+      setInvoices(invoiceData);
       setDataSource(result.source);
+
+      // Calculate stats from fetched invoices
+      calculateStats(invoiceData);
     } catch (error) {
       console.error('Error fetching invoices:', error);
       setInvoices([]);
@@ -71,6 +85,37 @@ const Invoices = () => {
     }
   };
 
+  const fetchUsageLimits = async () => {
+    try {
+      const result = await invoiceService.getUsageLimits();
+      console.log('📊 Invoice Usage Limits Response:', result);
+      console.log('📊 Can add more?', result?.can_add_more);
+      console.log('📊 Current usage:', result?.current_usage);
+      console.log('📊 Limit:', result?.limit);
+      setUsageLimits(result);
+    } catch (error) {
+      console.error('❌ Error fetching usage limits:', error);
+    }
+  };
+
+  const calculateStats = (invoiceList) => {
+    const totalRevenue = invoiceList.reduce((sum, inv) => sum + parseFloat(inv.total || 0), 0);
+    const totalPaid = invoiceList.reduce((sum, inv) => sum + parseFloat(inv.amount_paid || 0), 0);
+    const totalOutstanding = invoiceList.reduce((sum, inv) => sum + parseFloat(inv.balance_due || 0), 0);
+
+    const stats = {
+      total: invoiceList.length,
+      paid: invoiceList.filter(inv => inv.status === 'paid').length,
+      unpaid: invoiceList.filter(inv => inv.status === 'unpaid').length,
+      overdue: invoiceList.filter(inv => inv.status === 'overdue').length,
+      partial: invoiceList.filter(inv => inv.status === 'partial').length,
+      draft: invoiceList.filter(inv => inv.status === 'draft').length,
+      totalRevenue,
+      totalPaid,
+      totalOutstanding,
+    };
+    setStats(stats);
+  };
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -193,11 +238,12 @@ const Invoices = () => {
 
   const handleDeleteConfirm = async () => {
     if (!invoiceToDelete) return;
-    
+
     setIsDeleting(true);
     try {
       await invoiceService.deleteInvoice(invoiceToDelete._id || invoiceToDelete.id);
       await fetchInvoices();
+      await fetchUsageLimits(); // Refresh usage counter
       setIsDeleteModalOpen(false);
       setInvoiceToDelete(null);
       toast.success('Invoice deleted successfully!');
@@ -250,8 +296,14 @@ const Invoices = () => {
       
       const result = await invoiceService.createInvoice(newInvoiceData);
       if (result.success) {
+        const duplicatedInvoice = result.data;
         await fetchInvoices();
-        toast.success('Invoice duplicated successfully!');
+        await fetchUsageLimits(); // Refresh usage counter
+
+        // Show template selection modal for the duplicated invoice
+        setNewlyCreatedInvoice(duplicatedInvoice);
+        setIsDuplicatedInvoice(true);
+        setIsTemplateSelectionModalOpen(true);
       } else {
         throw new Error(result.error || 'Failed to duplicate invoice');
       }
@@ -281,8 +333,9 @@ const Invoices = () => {
   const handleDownloadPDF = async (invoice) => {
     try {
       const invoiceId = invoice.id || invoice._id;
-      // Use documentService instead of invoiceService to get template system
-      await documentService.downloadInvoicePDF(invoiceId, null, `invoice-${invoice.invoice_number}.pdf`);
+      // Use the selected template if available, otherwise use default
+      const templateId = invoice.selected_template || null;
+      await documentService.downloadInvoicePDF(invoiceId, templateId, `invoice-${invoice.invoice_number}.pdf`);
       toast.success('Invoice PDF downloaded successfully!');
     } catch (error) {
       console.error('Error downloading PDF:', error);
@@ -405,28 +458,110 @@ const Invoices = () => {
             {dataSource && (
               <span className={`px-2 py-1 text-xs rounded-full ${
                 dataSource === 'api' 
-                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                  ? '' 
                   : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
               }`}>
-                {dataSource === 'api' ? '🟢 Live Data' : '🟡 Demo Mode'}
+                {dataSource === 'api' ? '' : '🟡 Demo Mode'}
               </span>
             )}
           </div>
         </motion.div>
-        <motion.button
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            setSelectedInvoice(null);
-            setIsModalOpen(true);
-          }}
-          className="btn-primary flex items-center"
+        <div className="flex flex-col items-end gap-2">
+          {usageLimits && usageLimits.is_free_tier && (
+            <span className="text-xs text-gray-600 dark:text-gray-400">
+              {usageLimits.current_usage} / {usageLimits.limit} invoices used
+            </span>
+          )}
+          <motion.button
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              if (usageLimits && !usageLimits.can_add_more) {
+                setIsUpgradeModalOpen(true);
+                return;
+              }
+              setSelectedInvoice(null);
+              setIsModalOpen(true);
+            }}
+            className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+              usageLimits && !usageLimits.can_add_more
+                ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/50'
+                : 'btn-primary'
+            }`}
+          >
+            <PlusIcon className="h-5 w-5 mr-2" />
+            {usageLimits && !usageLimits.can_add_more ? 'Upgrade to Add More' : 'New Invoice'}
+          </motion.button>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="card p-4"
         >
-          <PlusIcon className="h-5 w-5 mr-2" />
-          New Invoice
-        </motion.button>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Total Invoices</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {stats.total || 0}
+              </p>
+            </div>
+            <DocumentTextIcon className="h-8 w-8 text-primary-500" />
+          </div>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="card p-4"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Paid</p>
+              <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                {stats.paid || 0}
+              </p>
+            </div>
+            <CheckCircleIcon className="h-8 w-8 text-green-500" />
+          </div>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="card p-4"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Outstanding</p>
+              <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                {stats.unpaid || 0}
+              </p>
+            </div>
+            <ClockIcon className="h-8 w-8 text-yellow-500" />
+          </div>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="card p-4"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Total Revenue</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                ${(stats.totalRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+            </div>
+            <CurrencyDollarIcon className="h-8 w-8 text-green-500" />
+          </div>
+        </motion.div>
       </div>
 
       {/* Stripe Setup Banner (Compact) */}
@@ -679,17 +814,54 @@ const Invoices = () => {
         invoice={selectedInvoice}
         onSave={async (invoiceData) => {
           try {
+            // Remove invoice_number if empty to allow backend auto-generation
+            const cleanedData = { ...invoiceData };
+            if (!cleanedData.invoice_number || cleanedData.invoice_number.trim() === '') {
+              delete cleanedData.invoice_number;
+            }
+
             let savedInvoice;
             if (selectedInvoice) {
               // Update existing invoice
-              savedInvoice = await invoiceService.updateInvoice(selectedInvoice._id || selectedInvoice.id, invoiceData);
+              savedInvoice = await invoiceService.updateInvoice(selectedInvoice._id || selectedInvoice.id, cleanedData);
             } else {
               // Add new invoice
-              const result = await invoiceService.createInvoice(invoiceData);
+              const result = await invoiceService.createInvoice(cleanedData);
               savedInvoice = result.success ? result.data : result;
+
+              // For new invoices, show template selection modal instead of success message
+              setNewlyCreatedInvoice(savedInvoice);
+              setIsModalOpen(false);
+              setSelectedInvoice(null);
+
+              // Mark expenses and mileage as invoiced before showing template modal
+              if (invoiceData._expenseIds && invoiceData._expenseIds.length > 0) {
+                try {
+                  const { default: expenseService } = await import('../services/expenseService');
+                  await expenseService.addExpensesToInvoice(savedInvoice.id, invoiceData._expenseIds);
+                  console.log('Marked expenses as invoiced:', invoiceData._expenseIds);
+                } catch (expenseError) {
+                  console.error('Error marking expenses as invoiced:', expenseError);
+                }
+              }
+
+              if (invoiceData._mileageIds && invoiceData._mileageIds.length > 0) {
+                try {
+                  const { default: expenseService } = await import('../services/expenseService');
+                  await expenseService.addMileageToInvoice(savedInvoice.id, invoiceData._mileageIds);
+                  console.log('Marked mileage as invoiced:', invoiceData._mileageIds);
+                } catch (mileageError) {
+                  console.error('Error marking mileage as invoiced:', mileageError);
+                }
+              }
+
+              await fetchInvoices();
+              await fetchUsageLimits(); // Refresh usage counter
+              setIsTemplateSelectionModalOpen(true);
+              return; // Exit early - don't show success toast yet
             }
-            
-            // Mark expenses and mileage as invoiced if they were added during creation
+
+            // For updates only: Mark expenses and mileage as invoiced if they were added during editing
             if (invoiceData._expenseIds && invoiceData._expenseIds.length > 0) {
               try {
                 const { default: expenseService } = await import('../services/expenseService');
@@ -782,6 +954,20 @@ const Invoices = () => {
         onPaymentRecorded={handleQuickPaymentRecorded}
       />
 
+      {/* Template Selection Modal - Appears after creating new invoice */}
+      <TemplateSelectionModal
+        isOpen={isTemplateSelectionModalOpen}
+        onClose={async () => {
+          setIsTemplateSelectionModalOpen(false);
+          const wasDuplicated = isDuplicatedInvoice;
+          setNewlyCreatedInvoice(null);
+          setIsDuplicatedInvoice(false);
+          await fetchInvoices(); // Refresh to get latest data
+          toast.success(wasDuplicated ? 'Invoice duplicated successfully!' : 'Invoice created successfully!');
+        }}
+        invoice={newlyCreatedInvoice}
+      />
+
       {/* Invoice Actions Modal */}
       <InvoiceActionsModal
         isOpen={isActionsModalOpen}
@@ -798,6 +984,12 @@ const Invoices = () => {
         onSend={handleSendInvoice}
         onDownloadPDF={handleDownloadPDF}
         onRecordPayment={handlePayment}
+      />
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        isOpen={isUpgradeModalOpen}
+        onClose={() => setIsUpgradeModalOpen(false)}
       />
     </div>
   );
