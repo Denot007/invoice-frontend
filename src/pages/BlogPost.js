@@ -275,7 +275,7 @@ const BlogPost = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="prose prose-lg prose-invert max-w-none mb-12
+          className="prose prose-lg prose-invert max-w-none mb-12 [&_*]:text-gray-300
             prose-headings:text-white prose-headings:font-bold
             prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl
             prose-p:text-gray-300 prose-p:leading-relaxed
@@ -287,6 +287,7 @@ const BlogPost = () => {
             prose-pre:bg-slate-800 prose-pre:border prose-pre:border-slate-700
             prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:text-gray-400 prose-blockquote:italic
             prose-img:rounded-lg prose-img:shadow-xl"
+          style={{ color: '#d1d5db' }}
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
 
