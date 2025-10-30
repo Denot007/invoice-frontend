@@ -33,6 +33,8 @@ import AboutUs from './pages/AboutUs';
 import CookiePolicy from './pages/CookiePolicy';
 import RefundPolicy from './pages/RefundPolicy';
 import FAQ from './pages/FAQ';
+import Blog from './pages/Blog';
+import BlogPost from './pages/BlogPost';
 import MarketplacePayment from './pages/MarketplacePayment';
 import Payments from './pages/Payments';
 import PaymentSetupComplete from './pages/PaymentSetupComplete';
@@ -163,6 +165,11 @@ function App() {
                 <Route path="/refund" element={<RefundPolicy />} />
                 <Route path="/faq" element={<FAQ />} />
                 <Route path="/pricing" element={<Navigate to="/register" />} />
+
+                {/* Blog Routes */}
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/:slug" element={<BlogPost />} />
+
                 <Route path="/admin/marketplace" element={<MarketplacePayment />} />
                 
                 {/* Protected Routes */}
