@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useTheme } from '../context/ThemeContext';
+import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { getBlogPosts } from '../services/blogService';
+import Footer from '../components/layout/Footer';
 import {
   NewspaperIcon,
   CalendarIcon,
   TagIcon,
-  ArrowRightIcon
+  ArrowRightIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline';
 
 const Blog = () => {
-  const { theme } = useTheme();
+  const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -45,160 +47,255 @@ const Blog = () => {
     });
   };
 
+  const fadeInUp = {
+    initial: { opacity: 0, y: 60 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.6, ease: "easeOut" }
+  };
+
+  const staggerContainer = {
+    initial: {},
+    animate: {
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
   if (loading && posts.length === 0) {
     return (
-      <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-300">Loading blog posts...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      {/* Header */}
-      <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="text-center">
-            <NewspaperIcon className="h-12 w-12 text-indigo-600 mx-auto mb-4" />
-            <h1 className={`text-4xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              InvoiceGear Blog
-            </h1>
-            <p className={`mt-4 text-xl ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-              Tips, insights, and best practices for invoice management and business finance
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Navigation */}
+      <motion.nav
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="relative z-50 px-6 py-4"
+      >
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            className="flex items-center space-x-2 cursor-pointer"
+            onClick={() => navigate('/')}
+          >
+            <img src="/invoicegear-logo-light.svg" alt="InvoiceGear" className="h-10 w-auto" />
+          </motion.div>
+
+          <div className="flex items-center space-x-4">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate('/login')}
+              className="text-gray-300 hover:text-white transition-colors"
+            >
+              Sign In
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate('/register')}
+              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-full font-semibold hover:shadow-lg transition-all"
+            >
+              Get Started
+            </motion.button>
           </div>
         </div>
-      </div>
+      </motion.nav>
+
+      {/* Hero Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        className="relative px-6 py-20"
+      >
+        <div className="max-w-7xl mx-auto text-center">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            className="inline-block"
+          >
+            <SparklesIcon className="h-16 w-16 text-blue-400 mx-auto mb-6" />
+          </motion.div>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-5xl lg:text-6xl font-bold text-white mb-6"
+          >
+            InvoiceGear{' '}
+            <span className="bg-gradient-to-r from-cyan-300 to-blue-400 bg-clip-text text-transparent">
+              Blog
+            </span>
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="text-xl text-gray-300 max-w-3xl mx-auto"
+          >
+            Expert tips, insights, and best practices for invoice management, business finance, and getting paid faster
+          </motion.p>
+        </div>
+      </motion.div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-8">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-500/10 border border-red-500/50 text-red-300 px-6 py-4 rounded-lg mb-8"
+          >
             {error}
-          </div>
+          </motion.div>
         )}
 
         {posts.length === 0 && !loading ? (
-          <div className={`text-center py-12 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-            <NewspaperIcon className="h-16 w-16 mx-auto mb-4 opacity-50" />
-            <p className="text-xl">No blog posts available yet.</p>
+          <div className="text-center py-20">
+            <NewspaperIcon className="h-20 w-20 mx-auto mb-6 text-gray-600" />
+            <p className="text-xl text-gray-400">No blog posts available yet. Check back soon!</p>
           </div>
         ) : (
           <>
             {/* Blog Posts Grid */}
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {posts.map((post) => (
-                <Link
+            <motion.div
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+              className="grid gap-8 md:grid-cols-2 lg:grid-cols-3"
+            >
+              {posts.map((post, index) => (
+                <motion.div
                   key={post.id}
-                  to={`/blog/${post.slug}`}
-                  className={`group ${
-                    theme === 'dark' ? 'bg-gray-800' : 'bg-white'
-                  } rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300`}
+                  variants={fadeInUp}
+                  whileHover={{ y: -8, transition: { duration: 0.3 } }}
                 >
-                  {/* Featured Image */}
-                  {post.featuredImage && (
-                    <div className="aspect-w-16 aspect-h-9 overflow-hidden">
-                      <img
-                        src={post.featuredImage}
-                        alt={post.title}
-                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                  )}
-
-                  {/* Content */}
-                  <div className="p-6">
-                    {/* Category */}
-                    {post.category && (
-                      <span className="inline-block px-3 py-1 text-xs font-semibold text-indigo-600 bg-indigo-100 rounded-full mb-3">
-                        {post.category}
-                      </span>
-                    )}
-
-                    {/* Title */}
-                    <h2 className={`text-xl font-bold mb-3 ${
-                      theme === 'dark' ? 'text-white' : 'text-gray-900'
-                    } group-hover:text-indigo-600 transition-colors`}>
-                      {post.title}
-                    </h2>
-
-                    {/* Excerpt */}
-                    <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} mb-4 line-clamp-3`}>
-                      {post.excerpt}
-                    </p>
-
-                    {/* Meta Info */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center text-sm text-gray-500">
-                        <CalendarIcon className="h-4 w-4 mr-1" />
-                        {formatDate(post.publishedAt || post.createdAt)}
-                      </div>
-                      <div className="flex items-center text-indigo-600 font-medium text-sm">
-                        Read more
-                        <ArrowRightIcon className="h-4 w-4 ml-1" />
-                      </div>
-                    </div>
-
-                    {/* Tags */}
-                    {post.tags && post.tags.length > 0 && (
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {post.tags.slice(0, 3).map((tag, index) => (
-                          <span
-                            key={index}
-                            className={`inline-flex items-center text-xs ${
-                              theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                            }`}
-                          >
-                            <TagIcon className="h-3 w-3 mr-1" />
-                            {tag}
-                          </span>
-                        ))}
+                  <Link
+                    to={`/blog/${post.slug}`}
+                    className="group block bg-slate-800/50 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-300 border border-slate-700/50 h-full"
+                  >
+                    {/* Featured Image */}
+                    {post.image && (
+                      <div className="relative aspect-w-16 aspect-h-9 overflow-hidden">
+                        <img
+                          src={post.image}
+                          alt={post.title}
+                          className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
                       </div>
                     )}
-                  </div>
-                </Link>
+
+                    {/* Content */}
+                    <div className="p-6">
+                      {/* Category */}
+                      {post.category && (
+                        <span className="inline-block px-3 py-1 text-xs font-semibold bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full mb-3">
+                          {post.category}
+                        </span>
+                      )}
+
+                      {/* Title */}
+                      <h2 className="text-xl font-bold mb-3 text-white group-hover:text-cyan-300 transition-colors">
+                        {post.title}
+                      </h2>
+
+                      {/* Excerpt */}
+                      <p className="text-gray-400 mb-4 line-clamp-3">
+                        {post.excerpt}
+                      </p>
+
+                      {/* Meta Info */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center text-sm text-gray-500">
+                          <CalendarIcon className="h-4 w-4 mr-1" />
+                          {formatDate(post.date)}
+                        </div>
+                        <div className="flex items-center text-blue-400 font-medium text-sm group-hover:text-cyan-300 transition-colors">
+                          Read more
+                          <ArrowRightIcon className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                        </div>
+                      </div>
+
+                      {/* Tags */}
+                      {post.tags && post.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {post.tags.slice(0, 3).map((tag, tagIndex) => (
+                            <span
+                              key={tagIndex}
+                              className="inline-flex items-center text-xs text-gray-500 bg-slate-700/50 px-2 py-1 rounded"
+                            >
+                              <TagIcon className="h-3 w-3 mr-1" />
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="mt-12 flex justify-center">
-                <nav className="flex items-center space-x-2">
-                  <button
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="mt-16 flex justify-center"
+              >
+                <nav className="flex items-center space-x-4">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
-                    className={`px-4 py-2 rounded ${
+                    className={`px-6 py-3 rounded-lg font-semibold transition-all ${
                       currentPage === 1
-                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                        : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                        ? 'bg-slate-800 text-gray-600 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-lg hover:shadow-purple-500/50'
                     }`}
                   >
                     Previous
-                  </button>
-                  <span className={`px-4 py-2 ${theme === 'dark' ? 'text-white' : 'text-gray-700'}`}>
+                  </motion.button>
+                  <span className="px-6 py-3 text-white font-medium">
                     Page {currentPage} of {totalPages}
                   </span>
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage === totalPages}
-                    className={`px-4 py-2 rounded ${
+                    className={`px-6 py-3 rounded-lg font-semibold transition-all ${
                       currentPage === totalPages
-                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                        : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                        ? 'bg-slate-800 text-gray-600 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-lg hover:shadow-purple-500/50'
                     }`}
                   >
                     Next
-                  </button>
+                  </motion.button>
                 </nav>
-              </div>
+              </motion.div>
             )}
           </>
         )}
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
