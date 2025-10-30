@@ -40,12 +40,12 @@ export const getBlogPosts = async (params = {}) => {
  */
 export const getBlogPost = async (slug) => {
   try {
-    const response = await blogApi.get(`/posts/${slug}`, {
+    const response = await blogApi.get('/posts', {
       params: {
-        platform: 'invoicegear'
+        slug
       }
     });
-    return response.data;
+    return response.data.post;
   } catch (error) {
     console.error(`Error fetching blog post ${slug}:`, error);
     throw error;
