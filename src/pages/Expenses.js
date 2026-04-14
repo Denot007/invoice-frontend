@@ -1212,9 +1212,8 @@ const Expenses = () => {
     }
 
     try {
-      // Generate invoice number with timestamp
-      const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-      const invoiceNumber = `INV-${autoCreateClientName.replace(/\s+/g, '').slice(0, 4).toUpperCase()}-${timestamp}`;
+      // Generate professional invoice number: 6-digit random number
+      const invoiceNumber = Math.floor(100000 + Math.random() * 900000).toString();
       
       const invoiceData = {
         client: autoCreateClientId,
