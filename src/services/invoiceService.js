@@ -187,7 +187,12 @@ class InvoiceService {
           status: invoiceData.status || 'draft',
           items: invoiceData.items || [],
         };
-        
+
+        // Include initial payment if provided
+        if (invoiceData.initial_payment) {
+          backendData.initial_payment = invoiceData.initial_payment;
+        }
+
         const result = await apiService.createInvoice(backendData);
         // Map the created invoice response
         const invoice = result.data || result;
@@ -271,7 +276,12 @@ class InvoiceService {
           status: invoiceData.status || 'draft',
           items: invoiceData.items || [],
         };
-        
+
+        // Include initial payment if provided (for adding payment during edit)
+        if (invoiceData.initial_payment) {
+          backendData.initial_payment = invoiceData.initial_payment;
+        }
+
         const result = await apiService.updateInvoice(id, backendData);
         // Map the updated invoice response
         const invoice = result.data || result;
