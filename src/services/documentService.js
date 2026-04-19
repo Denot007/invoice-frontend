@@ -133,17 +133,11 @@ class DocumentService {
 
   async generateInvoicePDF(invoiceId, templateId = null, customSettings = {}) {
     try {
-      const options = {
-        format: 'pdf',
-        save_version: true,
-        ...customSettings
-      };
-      
-      if (templateId) {
-        options.template_id = templateId;
-      }
-
-      const response = await this.generateDocument('invoice', invoiceId, options);
+      // Use the correct invoice export endpoint
+      const response = await api.get(
+        `/invoices/${invoiceId}/export_invoice_pdf/`,
+        { responseType: 'blob' }
+      );
       return response;
     } catch (error) {
       console.error('DocumentService.generateInvoicePDF error:', error);
