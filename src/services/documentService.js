@@ -120,7 +120,7 @@ class DocumentService {
   async generateDocument(contentType, objectId, options = {}) {
     try {
       const response = await api.post(
-        `/documents/generate/generate/${contentType}/${objectId}/`,
+        `/documents/generate/${contentType}/${objectId}/`,
         options,
         { responseType: 'blob' }
       );
